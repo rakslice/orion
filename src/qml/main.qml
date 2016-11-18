@@ -24,19 +24,19 @@ ApplicationWindow {
 
     title: "Orion"
     //flags: Qt.FramelessWindowHint | Qt.Window
-    visibility: g_fullscreen ? "FullScreen" : windowstate
+    //visibility: g_fullscreen ? "FullScreen" : windowstate
 
     property variant g_rootWindow: root
     property variant g_tooltip
     property variant g_toolBox: sidebar
     property bool g_contextMenuVisible: false
     property bool g_fullscreen: false
-    onG_fullscreenChanged: {
-        if (g_fullscreen)
-            windowstate = visibility
-    }
+    //onG_fullscreenChanged: {
+//        if (g_fullscreen)
+//            windowstate = visibility
+    //}
 
-    property var windowstate: "Windowed"
+    //property var windowstate: "Windowed"
 
     function dp(number){
         return Dpi.scale(number)
@@ -46,29 +46,29 @@ ApplicationWindow {
         height = view.width * 0.5625
     }
 
-    onClosing: {
-        if (!g_cman.isCloseToTray()) {
-            Qt.quit()
-        }
-    }
+//    onClosing: {
+//        if (!g_cman.isCloseToTray()) {
+//            Qt.quit()
+//        }
+//    }
 
-    Connections {
-        target: g_tray
-        onShowTriggered: {
-            if (root.visible)
-                root.hide()
-            else
-                root.show()
-        }
-    }
+//    Connections {
+//        target: g_tray
+//        onShowTriggered: {
+//            if (root.visible)
+//                root.hide()
+//            else
+//                root.show()
+//        }
+//    }
 
-    Connections {
-        target: g_guard
-        onAnotherProcessTriggered: {
-            root.show()
-            root.raise()
-        }
-    }
+//    Connections {
+//        target: g_guard
+//        onAnotherProcessTriggered: {
+//            root.show()
+//            root.raise()
+//        }
+//    }
 
     Item {
         anchors.fill: parent
@@ -105,11 +105,11 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        height=Screen.height * 0.7
-        width=height * 1.2
+//        height=Screen.height * 0.7
+//        width=height * 1.2
 
-        setX(Screen.width / 2 - width / 2);
-        setY(Screen.height / 2 - height / 2);
+//        setX(Screen.width / 2 - width / 2);
+//        setY(Screen.height / 2 - height / 2);
 
         var component = Qt.createComponent("components/Tooltip.qml")
         g_tooltip = component.createObject(root)

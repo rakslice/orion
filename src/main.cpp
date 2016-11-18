@@ -22,17 +22,20 @@
 #include <QString>
 #include <QtSvg/QGraphicsSvgItem>
 #include <QFontDatabase>
-#include <QtWebEngine>
 #include <QResource>
-#include "util/runguard.h"
 #include "model/channelmanager.h"
 #include "network/networkmanager.h"
 #include "power/power.h"
 #include "systray.h"
 #include "customapp.h"
-#include "notification/notificationmanager.h"
 #include "model/vodmanager.h"
 #include "model/ircchat.h"
+
+#ifndef Q_OS_ANDROID
+#include <QtWebEngine>
+#include "notification/notificationmanager.h"
+#include "util/runguard.h"
+#endif
 
 #ifdef MPV_PLAYER
     #include "player/mpvrenderer.h"
@@ -44,7 +47,14 @@ int main(int argc, char *argv[])
     //NOTE apparently this causes application to crash on moving to another screen
     //qputenv("QT_DEVICE_PIXEL_RATIO",QByteArray("auto"));
 
-    CustomApp app(argc, argv);
+    QGuiApplication app(argc, argv);
+
+    //Init engine
+    QQmlApplicationEngine engine;
+
+#ifndef Q_OS_ANDROID
+    //Init webengine
+    QtWebEngine::initialize();
 
     //Single application solution
     RunGuard guard("wz0dPKqHv3vX0BBsUFZt");
@@ -53,21 +63,15 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    //Init engine
-    QQmlApplicationEngine engine;
-
-    //Init webengine
-    QtWebEngine::initialize();
+    SysTray *tray = new SysTray();
+    tray->setIcon(appIcon);
+    QObject::connect(tray, SIGNAL(closeEventTriggered()), &app, SLOT(quit()));
+#endif
 
     QIcon appIcon = QIcon(":/icon/orion.ico");
     app.setFont(QFont("qrc:/fonts/NotoSans-Regular.ttf"));
 
     app.setWindowIcon(appIcon);
-
-    SysTray *tray = new SysTray();
-    tray->setIcon(appIcon);
-
-    QObject::connect(tray, SIGNAL(closeEventTriggered()), &app, SLOT(quit()));
 
     //Prime network manager
     QNetworkProxyFactory::setUseSystemConfiguration(true);
@@ -107,13 +111,11 @@ int main(int argc, char *argv[])
     rootContext->setContextProperty("dpiMultiplier", dpiMultiplier);
     rootContext->setContextProperty("netman", netman);
     rootContext->setContextProperty("g_cman", cman);
-    rootContext->setContextProperty("g_guard", &guard);
     rootContext->setContextProperty("g_powerman", power);
     rootContext->setContextProperty("g_favourites", cman->getFavouritesProxy());
     rootContext->setContextProperty("g_results", cman->getResultsModel());
     rootContext->setContextProperty("g_featured", cman->getFeaturedProxy());
     rootContext->setContextProperty("g_games", cman->getGamesModel());
-    rootContext->setContextProperty("g_tray", tray);
     rootContext->setContextProperty("g_vodmgr", vod);
     rootContext->setContextProperty("vodsModel", vod->getModel());
 
@@ -132,12 +134,16 @@ int main(int argc, char *argv[])
 
     engine.load(QUrl("qrc:/main.qml"));
 
+#ifndef Q_OS_ANDROID
     //Set up notifications
     NotificationManager *notificationManager = new NotificationManager(&engine, netman->getManager());
     QObject::connect(cman, SIGNAL(pushNotification(QString,QString,QString)), notificationManager, SLOT(pushNotification(QString,QString,QString)));
 
-    qDebug() << "Starting window...";
+    rootContext->setContextProperty("g_guard", &guard);
+    rootContext->setContextProperty("g_tray", tray);
     tray->show();
+#endif
+    qDebug() << "Starting window...";
 
     app.exec();
 
@@ -145,10 +151,13 @@ int main(int argc, char *argv[])
 
     //Cleanup
     delete vod;
-    delete tray;
     delete netman;
     delete cman;
+
+#ifndef Q_OS_ANDROID
+    delete tray;
     delete notificationManager;
+#endif
 
     qDebug() << "Closing application...";
     return 0;

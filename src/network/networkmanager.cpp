@@ -18,7 +18,10 @@
 #include "../util/m3u8parser.h"
 #include <QNetworkConfiguration>
 #include <QEventLoop>
+
+#ifndef Q_OS_ANDROID
 #include <QtWebEngine>
+#endif
 
 NetworkManager::NetworkManager(QNetworkAccessManager *man)
 {

@@ -34,7 +34,7 @@ Rectangle {
         playerView.visible = false
         settingsView.visible = false
         vodsView.visible = false
-        webView.visible = false
+        //webView.visible = false
 
         switch (selection){
 
@@ -79,9 +79,9 @@ Rectangle {
             settingsView.visible = true
             break
 
-        case 7:
-            webView.visible = true
-            break
+//        case 7:
+//            webView.visible = true
+//            break
         }
     }
 
@@ -115,10 +115,10 @@ Rectangle {
         visible: false
     }
 
-    WebView{
-        id: webView
-        visible: false
-    }
+//    WebView{
+//        id: webView
+//        visible: false
+//    }
 
     PlayerView {
         id: playerView

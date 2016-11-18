@@ -18,10 +18,12 @@
 #include <QDebug>
 #include <QWindow>
 
+#ifndef Q_OS_ANDROID
 #ifdef Q_OS_LINUX
     #include <QtDBus>
 #elif defined(Q_OS_MAC)
     #include <CoreServices/CoreServices.h>
+#endif
 #endif
 
 Power::Power(QApplication *app) :
@@ -40,6 +42,7 @@ Power::~Power()
 void Power::setScreensaver(bool enabled)
 {
 
+#ifndef Q_OS_ANDROID
 #ifdef Q_OS_LINUX
 
     if (!enabled) {
@@ -103,6 +106,8 @@ void Power::setScreensaver(bool enabled)
             timer->start(25000);
         }
     }
+#endif
+
 #endif
 }
 

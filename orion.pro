@@ -4,7 +4,17 @@
 #
 #-------------------------------------------------
 
-QT     += gui opengl qml quick network widgets webengine
+QT     += gui opengl qml quick network widgets
+
+!android {
+    QT += webengine
+
+    SOURCES +=  \
+        src/notification/notificationmanager.cpp
+
+    HEADERS +=  \
+        src/notification/notificationmanager.h
+}
 
 TARGET = orion
 
@@ -28,7 +38,6 @@ SOURCES += src/main.cpp\
     src/model/vod.cpp \
     src/model/vodlistmodel.cpp \
     src/model/vodmanager.cpp \
-    src/notification/notificationmanager.cpp \
     src/model/ircchat.cpp
 
 
@@ -49,10 +58,10 @@ HEADERS  += src/model/channel.h \
     src/model/vodlistmodel.h \
     src/model/vodmanager.h \
     src/network/urls.h \
-    src/notification/notificationmanager.h \
-    src/model/ircchat.h
+    src/model/ircchat.h \
 
 #Backend for player, uses mpv as default
+CONFIG += multimedia
 !qtav: !multimedia {
     CONFIG *= mpv
 }
@@ -91,7 +100,7 @@ multimedia {
     }
 }
 
-QMAKE_CXXFLAGS += -Wall -O2
+#QMAKE_CXXFLAGS += -Wall -O2
 
 CONFIG += c++11
 #CONFIG += console
@@ -99,7 +108,7 @@ CONFIG += c++11
 DISTFILES += src/qml/icon/orion.svg \
     src/qml/player.html
 
-unix:!macx: {
+unix:!macx:!android {
     QT += dbus
 
     HEADERS += src/notification/notificationsender.h
