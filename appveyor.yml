@@ -3,4 +3,5 @@ install:
   - set PATH=%PATH%;%QTDIR%\bin
 build_script:
   - qmake orion.pro
+  - nmake
   - dir /s
