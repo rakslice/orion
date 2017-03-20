@@ -1,7 +1,45 @@
 install:
   - set QTDIR=C:\Qt\5.8\msvc2015
   - set PATH=%PATH%;%QTDIR%\bin
+  - set MPVDIR=c:\mpv
+  - mkdir "%MPVDIR%"
+  - Invoke-WebRequest "https://superb-sea2.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-i686-20170305-git-85c8556ee.7z" -OutFile "%MPVDIR%\mpv-dev.7z"
+  - cd "%MPVDIR%"
+  - 7z x -y mpv-dev.7z
+  - mkdir include\mpv
+  - move include\*.* include\mpv
+  - set INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt;%MPVDIR%\include
+  - set LIB=%QTDIR%\lib;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\lib;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt;%MPVDIR%  
+
 build_script:
-  - qmake orion.pro
-  - nmake
-  - dir /s
+- cmd: >-
+    qmake orion.pro
+
+    mkdir libs
+
+    copy /y "%MPVDIR%\mpv-1.dll" libs
+
+    copy /y "C:\OpenSSL-Win32\ssleay32.dll" libs
+
+    copy /y "C:\OpenSSL-Win32\libeay32.dll" libs
+
+    lib /def:i:\mpv\mpv.def /name:i:\mpv\mpv-1.dll /out:i:\mpv\mpv.lib /MACHINE:X86
+
+    nmake release
+
+    for %%x in (WebEngine,Quick,Gui,Widgets) do (
+
+        echo %%x
+
+        copy /y "%QTDIR%\bin\Qt5%%x.dll" release
+
+    )
+
+    dir /s
+
+after_build:
+  - 7z a orion.zip release
+
+artifacts:
+  - path: orion.zip
+    name: orion windows 32-bit zip
