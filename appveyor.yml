@@ -28,7 +28,7 @@ build_script:
 
     copy /y "C:\OpenSSL-Win32\libeay32.dll" libs
 
-    lib /def:i:\mpv\mpv.def /name:i:\mpv\mpv-1.dll /out:i:\mpv\mpv.lib /MACHINE:X86
+    lib /def:%MPVDIR%\mpv.def /name:%MPVDIR%\mpv-1.dll /out:%MPVDIR%\mpv.lib /MACHINE:X86
 
     nmake release
 
