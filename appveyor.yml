@@ -35,13 +35,13 @@ build_script:
 
     nmake release
 
-    for %%x in (WebEngine,Quick,Gui,Widgets) do (
+    copy /y "%QTDIR%\bin\Qt5WebEngine.dll" release
 
-        echo %%x
+    copy /y "%QTDIR%\bin\Qt5Quick.dll" release
 
-        copy /y "%QTDIR%\bin\Qt5%%x.dll" release
+    copy /y "%QTDIR%\bin\Qt5Gui.dll" release
 
-    )
+    copy /y "%QTDIR%\bin\Qt5Widgets.dll" release
 
     dir /s
 
