@@ -1,6 +1,6 @@
 install:
   - set MPVDIR=c:\mpv
-  - mkdir "%MPVDIR%"
+  - if not exist "%MPVDIR%" mkdir "%MPVDIR%"
   - ps: Start-FileDownload 'https://superb-sea2.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-i686-20170305-git-85c8556ee.7z' -FileName 'c:\mpv\mpv-dev.7z'
   - set QTDIR=C:\Qt\5.8\msvc2015
   - set PATH=%QTDIR%\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin;%PATH%
