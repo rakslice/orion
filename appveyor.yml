@@ -6,7 +6,7 @@ install:
   - set PATH=%QTDIR%\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin;%PATH%
   - cd "%MPVDIR%"
   - 7z x -y mpv-dev.7z
-  - mkdir include\mpv
+  - if not exist include\mpv mkdir include\mpv
   - move include\*.* include\mpv
   - dir /s
   - set INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt;%MPVDIR%\include
