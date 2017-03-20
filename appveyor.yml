@@ -1,9 +1,9 @@
 install:
-  - set QTDIR=C:\Qt\5.8\msvc2015
-  - set PATH=%PATH%;%QTDIR%\bin
   - set MPVDIR=c:\mpv
   - mkdir "%MPVDIR%"
-  - Invoke-WebRequest "https://superb-sea2.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-i686-20170305-git-85c8556ee.7z" -OutFile "%MPVDIR%\mpv-dev.7z"
+  - ps: Start-FileDownload 'https://superb-sea2.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-i686-20170305-git-85c8556ee.7z' -FileName 'c:\mpv\mpv-dev.7z'
+  - set QTDIR=C:\Qt\5.8\msvc2015
+  - set PATH=%PATH%;%QTDIR%\bin
   - cd "%MPVDIR%"
   - 7z x -y mpv-dev.7z
   - mkdir include\mpv
