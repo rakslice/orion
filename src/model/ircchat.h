@@ -27,11 +27,15 @@
 #include <QRegExp>
 #include <QColor>
 #include <QQmlListProperty>
+#include <QFile>
+#include <QHash>
 //#include "messagelistmodel.h"
 //#include "message.h"
 
 const qint16 PORT = 6667;
 const QString HOST = "irc.twitch.tv";
+
+//#define TWITCH_EMOTE_URI "https://static-cdn.jtvnw.net/emoticons/v1/%d/1.0"
 
 // Backend for chat
 class IrcChat : public QObject
@@ -64,22 +68,44 @@ public:
     bool connected();
     inline bool inRoom() { return !room.isEmpty(); }
 
+    //emote download
+    bool download_emotes(QString);
+
 signals:
     void errorOccured(QString errorDescription);
     void connectedChanged();
     void anonymousChanged();
-    void messageReceived(QString user, QString message);
+    void messageReceived(QString user, QVariantList message);
     void noticeReceived(QString message);
+
+    //emotes
+    void downloadComplete();
+    bool downloadError();
+    
 public slots:
     void sendMessage(const QString &msg);
     void onSockStateChanged();
     void login();
+
+    void dataAvailable();
+    void replyFinished();
+
 private slots:
     void createConnection();
     void receive();
     void processError(QAbstractSocket::SocketError socketError);
 
 private:
+    //some kind of emote table
+    //downloader for emotes
+    QFile _file;
+    QByteArray _data;
+    QNetworkAccessManager _manager;
+    QNetworkReply* _reply = nullptr;
+    QList<QNetworkReply *> currentDownloads; //??...
+    
+    QHash<QString, QString> emote_table;
+
     void parseCommand(QString cmd);
     QString getParamValue(QString params, QString param);
     QTcpSocket *sock;

@@ -25,6 +25,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDir>
+#include <QStandardPaths>
+#include <QImage>
 
 IrcChat::IrcChat(QObject *parent) :
     QObject(parent) {
@@ -44,6 +47,8 @@ IrcChat::IrcChat(QObject *parent) :
     connect(sock, SIGNAL(connected()), this, SLOT(onSockStateChanged()));
     connect(sock, SIGNAL(disconnected()), this, SLOT(onSockStateChanged()));
 
+
+    //download_emotes();
     room = "";
 }
 
@@ -114,7 +119,9 @@ bool IrcChat::connected() {
 void IrcChat::sendMessage(const QString &msg) {
     if (inRoom() && connected()) {
         sock->write(("PRIVMSG #" + room + " :" + msg + "\r\n").toStdString().c_str());
-        emit messageReceived(username, msg);
+        QVariantList message;
+        message.append(msg);
+        emit messageReceived(username, message);
     }
 }
 
@@ -184,11 +191,50 @@ void IrcChat::parseCommand(QString cmd) {
         return;
     }
     if(cmd.contains("PRIVMSG")) {
+
         // Structure of message: '@color=#HEX;display-name=NicK;emotes=id:start-end,start-end/id:start-end;subscriber=0or1;turbo=0or1;user-type=type :nick!nick@nick.tmi.twitch.tv PRIVMSG #channel :message'
         QString params = cmd.left(cmd.indexOf("PRIVMSG"));
         QString nickname = params.left(params.lastIndexOf('!')).remove(0, params.lastIndexOf(':') + 1);
+        QString emotes = params.left(params.indexOf("id") - 1).remove(0, params.indexOf("tes=")+4);
         QString message = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
-        emit messageReceived(nickname, message);
+        QString oldmessage = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
+        QVariantList messageList;
+        QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
+        qDebug() << oldmessage;
+        if(emotes != "") {
+          auto emoteList = emotes.split('/');
+          for(auto emote : emoteList) {
+            auto key = emote.left(emote.indexOf(':'));
+            emote.remove(0, emote.indexOf(':')+1);
+            qDebug() << "the emote and stuff" << key;
+            download_emotes(key);
+            auto replaceIndexs = emote.split(',');
+            int prev = 0;
+            int first = 0;
+            //TODO: don't add empty values at start
+            for(auto emotePlc : replaceIndexs) {
+              auto firstAndLast = emotePlc.split('-');
+              first = firstAndLast[0].toInt();
+              int last = firstAndLast[1].toInt();
+              if(first >  0) {
+                messageList.append(message.left(first));
+              }
+              else {
+                messageList.append(message.mid(prev + 1, first));
+              }
+              messageList.append(key);
+              prev = last;
+            }
+            if(prev+1 < message.size()) {
+              messageList.append(message.mid(prev+1, message.size()-1));
+            }
+          }
+        }
+        else {
+          messageList.append(message);
+        }
+        qDebug() << messageList;
+        emit messageReceived(nickname, messageList);
         return;
     }
     if(cmd.contains("NOTICE")) {
@@ -206,4 +252,44 @@ QString IrcChat::getParamValue(QString params, QString param) {
     QString paramValue = params.remove(0, params.indexOf(param + "="));
     paramValue = paramValue.left(paramValue.indexOf(';')).remove(0, paramValue.indexOf('=') + 1);
     return paramValue;
+}
+
+bool IrcChat::download_emotes(QString key) {
+    if(emote_table.contains(key)) {
+      qDebug() << "already in the table";
+        return false;
+    }
+    qDebug() << "downloading";
+    emote_table.insert(key, key);
+
+    QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
+    QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
+    dir.mkpath(".");
+
+    _file.setFileName(dir.absoluteFilePath(key + ".png"));
+    _file.open(QFile::WriteOnly);
+
+    QNetworkRequest request(url);
+    _reply = _manager.get(request);
+
+    connect(_reply, &QNetworkReply::readyRead,
+      this, &IrcChat::dataAvailable);
+    connect(_reply, &QNetworkReply::finished,
+      this, &IrcChat::replyFinished);
+
+    return true;
+}
+
+void IrcChat::dataAvailable() {
+  auto buffer = _reply->readAll();
+  _file.write(buffer.data(), buffer.size());
+}
+
+void IrcChat::replyFinished() {
+  if(_reply) {
+    _reply->deleteLater();
+    _file.close();
+    _reply = nullptr;
+    emit downloadComplete();
+  }
 }
