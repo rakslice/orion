@@ -35,13 +35,7 @@ build_script:
 
     nmake release
 
-    copy /y "%QTDIR%\bin\Qt5WebEngine.dll" release
-
-    copy /y "%QTDIR%\bin\Qt5Quick.dll" release
-
-    copy /y "%QTDIR%\bin\Qt5Gui.dll" release
-
-    copy /y "%QTDIR%\bin\Qt5Widgets.dll" release
+    %QTDIR%\bin\windeployqt --qmldir src\qml release\orion.exe
 
     dir /s
 
