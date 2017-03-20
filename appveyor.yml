@@ -10,8 +10,7 @@ install:
   - move include\*.* include\mpv
   - dir /s
   - set INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt;%MPVDIR%\include
-  - set LIB=%QTDIR%\lib;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\lib;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt;%MPVDIR%
-  - dir /s "C:\Program Files (x86)\Windows Kits\10\Lib"
+  - set LIB=%QTDIR%\lib;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\lib;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt\x86;%MPVDIR%
 
 cache:
   - c:\mpv\mpv-dev.7z -> appveyor.yml
