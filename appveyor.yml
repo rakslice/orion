@@ -13,6 +13,10 @@ install:
 
 build_script:
 - cmd: >-
+    echo APPVEYOR_BUILD_FOLDER=%APPVEYOR_BUILD_FOLDER%
+
+    cd %APPVEYOR_BUILD_FOLDER%
+
     qmake orion.pro
 
     mkdir libs
