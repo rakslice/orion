@@ -25,35 +25,60 @@ Item {
     height: childrenRect.height
 
     Component.onCompleted: {
+        console.log("Got: " + msg);
+        console.log("Got toString: " + msg.toString());
+        var rmsg = JSON.parse(msg);
 
-
-        if (msg)
+        if (rmsg)
         {
-            _text.text = "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>".arg(user) + (msg ? ": " : "")
-            parseMsg(msg)
+            _text.text = "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>".arg(user) + (rmsg ? ": " : "")
+            parseMsg(rmsg)
         }
         else
-            _text.text = "<font color=\"#FFFFFF\"><b>%1</b></font>".arg(user) + (msg ? ": " : "")
+            _text.text = "<font color=\"#FFFFFF\"><b>%1</b></font>".arg(user) + (rmsg ? ": " : "")
         _text.user = user
     }
 
     function parseMsg(msg) {
+        console.log("We are in parseMsg()");
+        console.log("msg typeof is " + typeof(msg));
+        //console.log("msg length is " + msg.length.toString());
+        console.log("msg tostring is " + msg.toString());
 
-        var mlist = msg.split(" ")
-        var textStr = ""
+        console.log("typeof msg.length " + typeof(msg.length));
+        console.log("msg.length " + msg.length.toString());
 
-        for (var i=0; i < mlist.length; i++) {
-            var str = mlist[i]
+        for (var j=0; j < msg.length; j++) {
+            var mlist = msg[j];
+            console.log("cur mlist entry " + j.toString() + " typeof is " + typeof(mlist));
+            if (typeof(mlist) == "number") {
+                // it's an emote
+                /*
+                var localPath = emoteDirPath + "/" + mlist.toString() + ".png";
+                if (localPath.charAt(1) == ":") {
+                    localPath = localPath.charAt(0) + localPath.substring(2);
+                }
+                var imgUrl = "file:///" + encodeURI(localPath);
+                */
+                var imgUrl = "https://static-cdn.jtvnw.net/emoticons/v1/" + mlist.toString() + "/1.0";
 
-            if (!str)
-                continue
+                _text.text += "<img src=\"" + imgUrl + "\"></img>";
 
-            textStr += "%1 ".arg(!isUrl(str) ? str : makeUrl(str))
+            } else {
+                mlist = mlist.split(" ")
+                var textStr = ""
+
+                for (var i=0; i < mlist.length; i++) {
+                    var str = mlist[i]
+
+                    textStr += "%1 ".arg(!isUrl(str) ? str : makeUrl(str))
+                }
+                _text.text += textStr.trim()
+            }
+
         }
 
-        _text.text += textStr.trim()
-
-        //console.log("Created text object: " + textStr)
+        console.log("Created text object: " + _text.text);
     }
 
     function makeUrl(str) {
