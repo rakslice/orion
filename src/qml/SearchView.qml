@@ -217,16 +217,17 @@ Item {
         onItemClicked: {
             if (currentItem.online){
                 playerView.getStreams(currentItem)
+            } else {
+                playerView.getChat(currentItem)
             }
         }
 
         onItemRightClicked: {
             _menu.item = currentItem
 
-            _menu.items[0].enabled = _menu.item.online
+            _watchLive.enabled = _menu.item.online
 
-            var item = _menu.items[2]
-            item.text = !_menu.item.favourite ? "Follow" : "Unfollow"
+            _fav.text = !_menu.item.favourite ? "Follow" : "Unfollow"
             _menu.state = !_menu.item.favourite ? 1 : 2
 
             _menu.popup()
@@ -244,6 +245,7 @@ Item {
             }
 
             MenuItem {
+                id: _watchLive
                 text: "Watch live"
                 //text: "Watch;play"
                 onTriggered: {
@@ -258,6 +260,13 @@ Item {
                 //text: "Videos;video"
                 onTriggered: {
                     vodsView.search(_menu.item)
+                }
+            }
+
+            MenuItem {
+                text: "Open chat"
+                onTriggered: {
+                    playerView.getChat(_menu.item);
                 }
             }
 

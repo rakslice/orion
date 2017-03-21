@@ -50,6 +50,9 @@ IrcChat::IrcChat(QObject *parent) :
 
     //download_emotes();
     room = "";
+
+	emoteDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes"));
+	emoteDirPathImpl = emoteDir.absolutePath();
 }
 
 IrcChat::~IrcChat() { disconnect(); }
@@ -198,42 +201,47 @@ void IrcChat::parseCommand(QString cmd) {
         QString emotes = params.left(params.indexOf("id") - 1).remove(0, params.indexOf("tes=")+4);
         QString message = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
         QString oldmessage = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
-        QVariantList messageList;
-        QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
-        qDebug() << oldmessage;
-        if(emotes != "") {
+		qDebug() << "emotes " << emotes;
+        qDebug() << "oldmessage " << oldmessage;
+
+		QMap<int, QPair<int, int>> emotePositionsMap;
+
+		if(emotes != "") {
           auto emoteList = emotes.split('/');
+
           for(auto emote : emoteList) {
             auto key = emote.left(emote.indexOf(':'));
             emote.remove(0, emote.indexOf(':')+1);
-            qDebug() << "the emote and stuff" << key;
-            download_emotes(key);
-            auto replaceIndexs = emote.split(',');
-            int prev = 0;
-            int first = 0;
-            //TODO: don't add empty values at start
-            for(auto emotePlc : replaceIndexs) {
+            qDebug() << "key " << key;
+            //download_emotes(key);
+            for(auto emotePlc : emote.split(',')) {
               auto firstAndLast = emotePlc.split('-');
-              first = firstAndLast[0].toInt();
-              int last = firstAndLast[1].toInt();
-              if(first >  0) {
-                messageList.append(message.left(first));
-              }
-              else {
-                messageList.append(message.mid(prev + 1, first));
-              }
-              messageList.append(key);
-              prev = last;
-            }
-            if(prev+1 < message.size()) {
-              messageList.append(message.mid(prev+1, message.size()-1));
+              int first = firstAndLast[0].toInt();
+              int last = firstAndLast.length() > 1 ? firstAndLast[1].toInt() : first;
+
+			  emotePositionsMap.insert(first, qMakePair(last, key.toInt()));
             }
           }
         }
-        else {
-          messageList.append(message);
-        }
-        qDebug() << messageList;
+
+		QVariantList messageList;
+
+		int cur = 0;
+		for (auto i = emotePositionsMap.constBegin(); i != emotePositionsMap.constEnd(); i++) {
+			auto emoteStart = i.key();
+			if (emoteStart > cur) {
+                messageList.append(message.mid(cur, emoteStart - cur).toHtmlEscaped());
+			}
+			auto emoteEnd = i.value().first;
+			auto emoteId = i.value().second;
+			messageList.append(emoteId);
+			cur = emoteEnd + 1;
+		}
+		if (cur < message.length()) {
+            messageList.append(message.mid(cur, message.length() - cur).toHtmlEscaped());
+		}
+
+		qDebug() << "messageList " << messageList;
         emit messageReceived(nickname, messageList);
         return;
     }
@@ -262,10 +270,9 @@ bool IrcChat::download_emotes(QString key) {
     qDebug() << "downloading";
 
     QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
-    QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
-    dir.mkpath(".");
+    emoteDir.mkpath(".");
 
-    _file.setFileName(dir.absoluteFilePath(key + ".png"));
+    _file.setFileName(emoteDir.absoluteFilePath(key + ".png"));
     _file.open(QFile::WriteOnly);
 
     QNetworkRequest request(url);
