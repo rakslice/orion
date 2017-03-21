@@ -98,6 +98,7 @@ Item {
         delegate: ChatMessage {
             user: model.user
             msg: model.message
+            emoteDirPath: chat.emoteDirPath
 
             anchors {
                 left: parent.left
@@ -184,6 +185,8 @@ Item {
         id: chat
 
         property variant colors:[]
+        property string emoteDirPath
+
         function getRandomColor() {
             var letters = '0123456789ABCDEF';
             var color = '#';
@@ -191,6 +194,10 @@ Item {
                 color += letters[Math.floor(Math.random() * 16)];
             }
             return color;
+        }
+
+        onSetEmotePath: {
+            emoteDirPath = value
         }
 
         onMessageReceived: {

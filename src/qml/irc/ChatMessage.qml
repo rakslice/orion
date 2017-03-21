@@ -19,6 +19,7 @@ Item {
     id: root
     property string user
     property string msg
+    property string emoteDirPath
     property int fontSize: Styles.titleFont.smaller
 
     height: childrenRect.height

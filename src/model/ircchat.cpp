@@ -50,6 +50,9 @@ IrcChat::IrcChat(QObject *parent) :
 
     //download_emotes();
     room = "";
+
+	emoteDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes"));
+	emoteDirPathImpl = emoteDir.absolutePath();
 }
 
 IrcChat::~IrcChat() { disconnect(); }
@@ -199,7 +202,6 @@ void IrcChat::parseCommand(QString cmd) {
         QString message = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
         QString oldmessage = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
         QVariantList messageList;
-        QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
         qDebug() << oldmessage;
         if(emotes != "") {
           auto emoteList = emotes.split('/');
@@ -262,10 +264,9 @@ bool IrcChat::download_emotes(QString key) {
     qDebug() << "downloading";
 
     QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
-    QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
-    dir.mkpath(".");
+    emoteDir.mkpath(".");
 
-    _file.setFileName(dir.absoluteFilePath(key + ".png"));
+    _file.setFileName(emoteDir.absoluteFilePath(key + ".png"));
     _file.open(QFile::WriteOnly);
 
     QNetworkRequest request(url);
