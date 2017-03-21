@@ -78,7 +78,7 @@ signals:
     void errorOccured(QString errorDescription);
     void connectedChanged();
     void anonymousChanged();
-    void messageReceived(QString user, QVariantList message);
+    void messageReceived(QString user, QVariantList message, QString chatColor, bool subscriber, bool turbo);
     void noticeReceived(QString message);
     void emoteTableChanged();
 

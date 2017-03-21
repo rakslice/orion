@@ -121,7 +121,8 @@ void IrcChat::sendMessage(const QString &msg) {
         sock->write(("PRIVMSG #" + room + " :" + msg + "\r\n").toStdString().c_str());
         QVariantList message;
         message.append(msg);
-        emit messageReceived(username, message);
+        //TODO need the user's status info to show here
+        emit messageReceived(username, message, "", false, false);
     }
 }
 
@@ -193,6 +194,36 @@ void IrcChat::parseCommand(QString cmd) {
     if(cmd.contains("PRIVMSG")) {
 
         // Structure of message: '@color=#HEX;display-name=NicK;emotes=id:start-end,start-end/id:start-end;subscriber=0or1;turbo=0or1;user-type=type :nick!nick@nick.tmi.twitch.tv PRIVMSG #channel :message'
+
+        QString displayName = "";
+        QString color = "";
+        bool subscriber = false;
+        bool turbo = false;
+
+        if (cmd.at(0) == QChar('@')) {
+            // tags are present
+            int tagsEnd = cmd.indexOf(" ");
+            QString tags = cmd.mid(1, tagsEnd - 1);
+            foreach(const QString & tag, tags.split(";")) {
+                int assignPos = tag.indexOf("=");
+                if (assignPos == -1) continue;
+                QString key = tag.left(assignPos);
+                QString value = tag.mid(assignPos + 1);
+                if (key == "display-name") {
+                    displayName = value;
+                }
+                else if (key == "color") {
+                    color = value;
+                }
+                else if (key == "subscriber") {
+                    subscriber = (value == "1");
+                }
+                else if (key == "turbo") {
+                    turbo = (value == "1");
+                }
+            }
+        }
+
         QString params = cmd.left(cmd.indexOf("PRIVMSG"));
         QString nickname = params.left(params.lastIndexOf('!')).remove(0, params.lastIndexOf(':') + 1);
         QString emotes = params.left(params.indexOf("id") - 1).remove(0, params.indexOf("tes=")+4);
@@ -234,7 +265,12 @@ void IrcChat::parseCommand(QString cmd) {
           messageList.append(message);
         }
         qDebug() << messageList;
-        emit messageReceived(nickname, messageList);
+
+        if (displayName.length() > 0) {
+            nickname = displayName;
+        }
+
+        emit messageReceived(nickname, messageList, color, subscriber, turbo);
         return;
     }
     if(cmd.contains("NOTICE")) {
