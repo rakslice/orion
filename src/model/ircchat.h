@@ -27,6 +27,7 @@
 #include <QRegExp>
 #include <QColor>
 #include <QQmlListProperty>
+#include <QImage>
 #include <QFile>
 #include <QHash>
 //#include "messagelistmodel.h"
@@ -50,6 +51,7 @@ public:
     Q_PROPERTY(bool anonymous READ anonymous WRITE setAnonymous NOTIFY anonymousChanged)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
     Q_PROPERTY(bool inRoom READ inRoom)
+    Q_PROPERTY(QHash<QString, QImage*> emoteTable READ emoteTable NOTIFY emoteTableChanged)
 
     Q_INVOKABLE void join(const QString channel);
     Q_INVOKABLE void leave();
@@ -70,6 +72,7 @@ public:
 
     //emote download
     bool download_emotes(QString);
+    QHash<QString, QImage*> emoteTable();
 
 signals:
     void errorOccured(QString errorDescription);
@@ -77,6 +80,7 @@ signals:
     void anonymousChanged();
     void messageReceived(QString user, QVariantList message);
     void noticeReceived(QString message);
+    void emoteTableChanged();
 
     //emotes
     void downloadComplete();
@@ -104,7 +108,7 @@ private:
     QNetworkReply* _reply = nullptr;
     QList<QNetworkReply *> currentDownloads; //??...
     
-    QHash<QString, QString> emote_table;
+    QHash<QString, QImage*> _emoteTable;
 
     void parseCommand(QString cmd);
     QString getParamValue(QString params, QString param);

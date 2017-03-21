@@ -255,12 +255,11 @@ QString IrcChat::getParamValue(QString params, QString param) {
 }
 
 bool IrcChat::download_emotes(QString key) {
-    if(emote_table.contains(key)) {
+    if(_emoteTable.contains(key)) {
       qDebug() << "already in the table";
         return false;
     }
     qDebug() << "downloading";
-    emote_table.insert(key, key);
 
     QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
     QDir dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes");
@@ -272,6 +271,8 @@ bool IrcChat::download_emotes(QString key) {
     QNetworkRequest request(url);
     _reply = _manager.get(request);
 
+    //emote_table.insert(key, );
+    
     connect(_reply, &QNetworkReply::readyRead,
       this, &IrcChat::dataAvailable);
     connect(_reply, &QNetworkReply::finished,
@@ -288,8 +289,18 @@ void IrcChat::dataAvailable() {
 void IrcChat::replyFinished() {
   if(_reply) {
     _reply->deleteLater();
+    QImage* emoteImg = new QImage();
+    emoteImg->load(_file.fileName());
+    qDebug() << _file.fileName();
+    //might need something for windows for the forwardslash..
+    _emoteTable.insert(_file.fileName().left(_file.fileName().indexOf(".png")).remove(0, _file.fileName().lastIndexOf('/') + 1), emoteImg);
+
     _file.close();
     _reply = nullptr;
     emit downloadComplete();
   }
+}
+
+QHash<QString, QImage*> IrcChat::emoteTable() {
+  return _emoteTable;
 }
