@@ -202,6 +202,7 @@ void IrcChat::parseCommand(QString cmd) {
         QString color = "";
         bool subscriber = false;
         bool turbo = false;
+		QString emotes = "";
 
         if (cmd.at(0) == QChar('@')) {
             // tags are present
@@ -224,12 +225,14 @@ void IrcChat::parseCommand(QString cmd) {
                 else if (key == "turbo") {
                     turbo = (value == "1");
                 }
+				else if (key == "emotes") {
+					emotes = value;
+				}
             }
         }
 
         QString params = cmd.left(cmd.indexOf("PRIVMSG"));
         QString nickname = params.left(params.lastIndexOf('!')).remove(0, params.lastIndexOf(':') + 1);
-        QString emotes = params.left(params.indexOf("id") - 1).remove(0, params.indexOf("tes=")+4);
         QString message = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
         QString oldmessage = cmd.remove(0, cmd.indexOf(':', cmd.indexOf("PRIVMSG")) + 1);
         qDebug() << "emotes " << emotes;
