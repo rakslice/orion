@@ -20,7 +20,7 @@ import aldrog.twitchtube.ircchat 1.0
 Item {
     id: root
 
-    signal messageReceived(string user, string message)
+    signal messageReceived(string user, string message, string chatColor, bool subscriber, bool turbo)
     signal notify(string message)
     signal clear()
 
@@ -43,7 +43,7 @@ Item {
     function joinChannel(channelName) {
         chat.join(channelName)
         root.channel = channelName
-        messageReceived("Joined channel #" + channelName, null)
+        messageReceived("Joined channel #" + channelName, null, "", false, false)
     }
 
     function leaveChannel() {
@@ -75,11 +75,11 @@ Item {
         }
 
         onMessageReceived: {
-            root.messageReceived(user, message)
+            root.messageReceived(user, message, chatColor, subscriber, turbo)
         }
 
         onNoticeReceived: {
-            root.messageReceived("--NOTIFICATION--", message)
+            root.messageReceived("--NOTIFICATION--", message, null, null, false, false)
         }
     }
 }
