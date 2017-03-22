@@ -66,14 +66,14 @@ Item {
 
             } else {
                 mlist = mlist.split(" ")
-                var textStr = ""
+                var textParts = [];
 
                 for (var i=0; i < mlist.length; i++) {
                     var str = mlist[i]
 
-                    textStr += "%1 ".arg(!isUrl(str) ? str : makeUrl(str))
+                    textParts.push(!isUrl(str) ? str : makeUrl(str))
                 }
-                _text.text += textStr.trim()
+                _text.text += textParts.join(" ");
             }
 
         }
