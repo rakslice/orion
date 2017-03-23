@@ -94,6 +94,7 @@ public:
     Q_INVOKABLE void leave();
     Q_INVOKABLE void disconnect();
     Q_INVOKABLE void reopenSocket();
+    Q_INVOKABLE void initProviders();
 
     //# User
     QString username, userpass;
@@ -113,6 +114,8 @@ public:
     bool download_emotes(QString);
     QHash<QString, QImage*> emoteTable();
     void loadEmoteImageFile(QString filename);
+
+    void RegisterEngineProviders(QQmlEngine & engine);
 
 signals:
     void errorOccured(QString errorDescription);
