@@ -53,6 +53,8 @@ IrcChat::IrcChat(QObject *parent) :
 
 	emoteDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes"));
 	emoteDirPathImpl = emoteDir.absolutePath();
+
+	activeDownloadCount = 0;
 }
 
 IrcChat::~IrcChat() { disconnect(); }
@@ -247,10 +249,10 @@ void IrcChat::parseCommand(QString cmd) {
           for(auto emote : emoteList) {
             auto key = emote.left(emote.indexOf(':'));
             emote.remove(0, emote.indexOf(':')+1);
-            //qDebug() << "key " << key;
-            if(!downloading) {
-              downloading = download_emotes(key);
-            }
+            qDebug() << "key " << key;
+            if (download_emotes(key)) {
+                activeDownloadCount += 1;
+			}
             for(auto emotePlc : emote.split(',')) {
               auto firstAndLast = emotePlc.split('-');
               int first = firstAndLast[0].toInt();
@@ -283,12 +285,12 @@ void IrcChat::parseCommand(QString cmd) {
             nickname = displayName;
         }
 
-        if(!downloading) {
+        if(activeDownloadCount == 0) {
           emit messageReceived(nickname, messageList, color, subscriber, turbo);
         }
         else {
-          QVariantList mylist {nickname, messageList, color, subscriber, turbo};
-          msgQueue.append(mylist);
+          // queue message to be shown when downloads are complete
+		  msgQueue.push_back({nickname, messageList, color, subscriber, turbo});
         }
         return;
     }
@@ -314,50 +316,89 @@ bool IrcChat::download_emotes(QString key) {
       qDebug() << "already in the table";
         return false;
     }
-    qDebug() << "downloading";
 
     QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
     emoteDir.mkpath(".");
 
+    QString filename = emoteDir.absoluteFilePath(key + ".png");
+
     if(emoteDir.exists(key + ".png")) {
-      return false;
+        qDebug() << "local file already exists";
+		loadEmoteImageFile(filename);
+        return false;
     }
-    _file.setFileName(emoteDir.absoluteFilePath(key + ".png"));
-    _file.open(QFile::WriteOnly);
+	qDebug() << "downloading";
 
     QNetworkRequest request(url);
+	QNetworkReply* _reply = nullptr;
     _reply = _manager.get(request);
 
+	DownloadHandler * dh = new DownloadHandler(filename);
+
     connect(_reply, &QNetworkReply::readyRead,
-      this, &IrcChat::dataAvailable);
+      dh, &DownloadHandler::dataAvailable);
     connect(_reply, &QNetworkReply::finished,
-      this, &IrcChat::replyFinished);
+      dh, &DownloadHandler::replyFinished);
+	connect(dh, &DownloadHandler::downloadComplete,
+		this, &IrcChat::individualDownloadComplete);
 
     return true;
 }
 
-void IrcChat::dataAvailable() {
+DownloadHandler::DownloadHandler(QString filename) : filename(filename) {
+    _file.setFileName(filename);
+    _file.open(QFile::WriteOnly);
+	qDebug() << "starting download of " << filename;
+}
+
+void DownloadHandler::dataAvailable() {
+  QNetworkReply* _reply = qobject_cast<QNetworkReply*>(sender());
   auto buffer = _reply->readAll();
   _file.write(buffer.data(), buffer.size());
 }
 
-void IrcChat::replyFinished() {
+void DownloadHandler::replyFinished() {
+  QNetworkReply* _reply = qobject_cast<QNetworkReply*>(sender());
   if(_reply) {
     _reply->deleteLater();
-    QImage* emoteImg = new QImage();
-    emoteImg->load(_file.fileName());
+	_file.close();
     //qDebug() << _file.fileName();
     //might need something for windows for the forwardslash..
-    _emoteTable.insert(_file.fileName().left(_file.fileName().indexOf(".png")).remove(0, _file.fileName().lastIndexOf('/') + 1), emoteImg);
+    qDebug() << "download of " << _file.fileName() << "complete";
 
-    _file.close();
-    _reply = nullptr;
-
-    auto tmpMsg = qvariant_cast<QVariantList>(msgQueue[0]);
-    //emit messageReceived(tmpMsg[0].toString(), qvariant_cast<QVariantList>(tmpMsg[1]), tmpMsg[2].toString(), tmpMsg[3].toBool(), tmpMsg[3].toBool());
-    //msgQueue.pop_front();
-    emit downloadComplete();
+    emit downloadComplete(_file.fileName());
   }
+}
+
+void IrcChat::loadEmoteImageFile(QString filename) {
+    QImage* emoteImg = new QImage();
+    emoteImg->load(filename);
+	QString emoteKey = filename.left(filename.indexOf(".png")).remove(0, filename.lastIndexOf('/') + 1);
+    _emoteTable.insert(emoteKey, emoteImg);
+}
+
+void IrcChat::individualDownloadComplete(QString filename) {
+    DownloadHandler * dh = qobject_cast<DownloadHandler*>(sender());
+    delete dh;
+    
+	loadEmoteImageFile(filename);
+    
+	if (activeDownloadCount > 0) {
+		activeDownloadCount--;
+		qDebug() << activeDownloadCount << " active downloads remaining";
+	}
+
+	if (activeDownloadCount == 0) {
+		qDebug() << "Download queue complete; posting pending messages";
+		while (!msgQueue.empty()) {
+			ChatMessage tmpMsg = msgQueue.first();
+			emit messageReceived(tmpMsg.name, tmpMsg.messageList, tmpMsg.color, tmpMsg.subscriber, tmpMsg.turbo);
+			msgQueue.pop_front();
+		}
+	}
+
+	//msgQueue.pop_front();
+	emit downloadComplete();
 }
 
 QHash<QString, QImage*> IrcChat::emoteTable() {
