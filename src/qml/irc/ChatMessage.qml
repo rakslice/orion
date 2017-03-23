@@ -13,17 +13,20 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.0
 import "../styles.js" as Styles
 
 Item {
     id: root
     property string user
-    property string msg
+    property var msg
     property string emoteDirPath
     property int fontSize: Styles.titleFont.smaller
+    property var pmsg: JSON.parse(msg)
 
     height: childrenRect.height
 
+    /*
     Component.onCompleted: {
         console.log("Got: " + msg);
         console.log("Got toString: " + msg.toString());
@@ -38,6 +41,7 @@ Item {
             _text.text = "<font color=\"#FFFFFF\"><b>%1</b></font>".arg(user) + (rmsg ? ": " : "")
         _text.user = user
     }
+    */
 
     function parseMsg(msg) {
         console.log("We are in parseMsg()");
@@ -91,6 +95,63 @@ Item {
         return str.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z]{2,6})([\/\w \.-]*)*\/?$/)
     }
 
+    Row {
+      anchors {
+          left: parent.left
+          right: parent.right
+      }
+
+      Text {
+        id: userName
+        verticalAlignment: Text.AlignVCenter
+        color: Styles.textColor
+        font.pixelSize: fontSize
+        text: "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>: ".arg(user)
+      }
+
+      Repeater {
+        model: pmsg
+
+        Loader {
+          height: typeof pmsg[index] == "string" ? 
+                    fontSize : 25
+          width: if(typeof pmsg[index] != "string")
+                    return 25
+          property var msgItem: pmsg[index]
+          sourceComponent: {
+            if(typeof pmsg[index] == "string") {
+              return msgText
+            }
+            else {
+              return imgThing
+            }
+          }
+        }
+      }
+    }
+
+    property Component msgText: Component {
+      Text {
+        verticalAlignment: Text.AlignVCenter
+        color: Styles.textColor
+        font.pixelSize: fontSize
+        text: msgItem
+        wrapMode: Text.WordWrap
+      }
+    }
+    property Component imgThing: Component {
+      Image {
+        Component.onCompleted: {
+          var localPath = emoteDirPath + "/" + msgItem.toString() + ".png";
+          if (localPath.charAt(1) == ":") {
+              localPath = localPath.charAt(0) + localPath.substring(2);
+          }
+          source = "file:///" + encodeURI(localPath);
+        }
+        asynchronous: true
+      }
+    }
+    /*
     Text {
         id: _text
         property string user: ""
@@ -124,4 +185,5 @@ Item {
         }
 
     }
+    */
 }
