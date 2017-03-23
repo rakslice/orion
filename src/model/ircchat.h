@@ -30,6 +30,7 @@
 #include <QImage>
 #include <QFile>
 #include <QHash>
+#include <QDir>
 //#include "messagelistmodel.h"
 //#include "message.h"
 
@@ -52,6 +53,7 @@ public:
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
     Q_PROPERTY(bool inRoom READ inRoom)
     Q_PROPERTY(QHash<QString, QImage*> emoteTable READ emoteTable NOTIFY emoteTableChanged)
+    Q_PROPERTY(QString emoteDirPath MEMBER emoteDirPathImpl)
 
     Q_INVOKABLE void join(const QString channel);
     Q_INVOKABLE void leave();
@@ -71,6 +73,8 @@ public:
     inline bool inRoom() { return !room.isEmpty(); }
 
     //emote download
+    QDir emoteDir;
+    QString emoteDirPathImpl;
     bool download_emotes(QString);
     QHash<QString, QImage*> emoteTable();
 
@@ -109,6 +113,7 @@ private:
     QList<QNetworkReply *> currentDownloads; //??...
     
     QHash<QString, QImage*> _emoteTable;
+    QVariantList msgQueue;
 
     void parseCommand(QString cmd);
     QString getParamValue(QString params, QString param);

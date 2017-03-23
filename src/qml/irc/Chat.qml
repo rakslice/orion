@@ -20,7 +20,8 @@ import aldrog.twitchtube.ircchat 1.0
 Item {
     id: root
 
-    signal messageReceived(string user, string message, string chatColor, bool subscriber, bool turbo)
+    signal messageReceived(string user, variant message, string chatColor, bool subscriber, bool turbo)
+    signal setEmotePath(string value)
     signal notify(string message)
     signal clear()
 
@@ -75,6 +76,7 @@ Item {
         }
 
         onMessageReceived: {
+            root.setEmotePath(emoteDirPath)
             root.messageReceived(user, message, chatColor, subscriber, turbo)
         }
 
