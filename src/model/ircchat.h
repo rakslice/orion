@@ -31,6 +31,7 @@
 #include <QFile>
 #include <QHash>
 #include <QDir>
+#include <QQuickImageProvider>
 //#include "messagelistmodel.h"
 //#include "message.h"
 
@@ -38,6 +39,40 @@ const qint16 PORT = 6667;
 const QString HOST = "irc.twitch.tv";
 
 //#define TWITCH_EMOTE_URI "https://static-cdn.jtvnw.net/emoticons/v1/%d/1.0"
+
+struct ChatMessage {
+    QString name;
+    QVariantList messageList;
+    QString color;
+    bool subscriber;
+    bool turbo;
+};
+
+// Handles state for an individual download
+class DownloadHandler : public QObject
+{
+    Q_OBJECT
+public:
+    DownloadHandler(QString filename);
+private:
+    QString filename;
+    QFile _file;
+
+signals:
+    void downloadComplete(QString filename);
+
+public slots:
+    void dataAvailable();
+    void replyFinished();
+};
+
+class CachedImageProvider : public QQuickImageProvider {
+public:
+    CachedImageProvider(QHash<QString, QImage*> & imageTable);
+    QImage requestImage(const QString &id, QSize * size, const QSize & requestedSize);
+private:
+    QHash<QString, QImage*> & imageTable;
+};
 
 // Backend for chat
 class IrcChat : public QObject
@@ -59,6 +94,7 @@ public:
     Q_INVOKABLE void leave();
     Q_INVOKABLE void disconnect();
     Q_INVOKABLE void reopenSocket();
+    Q_INVOKABLE void initProviders();
 
     //# User
     QString username, userpass;
@@ -75,8 +111,12 @@ public:
     //emote download
     QDir emoteDir;
     QString emoteDirPathImpl;
-    bool download_emotes(QString);
+    bool downloadEmotes(QString);
     QHash<QString, QImage*> emoteTable();
+    QSet<QString> emotesCurrentlyDownloading;
+    void loadEmoteImageFile(QString key, QString filename);
+
+    void RegisterEngineProviders(QQmlEngine & engine);
 
 signals:
     void errorOccured(QString errorDescription);
@@ -94,9 +134,7 @@ public slots:
     void sendMessage(const QString &msg);
     void onSockStateChanged();
     void login();
-
-    void dataAvailable();
-    void replyFinished();
+    void individualDownloadComplete(QString filename);
 
 private slots:
     void createConnection();
@@ -106,13 +144,12 @@ private slots:
 private:
     //some kind of emote table
     //downloader for emotes
-    QFile _file;
     QByteArray _data;
     QNetworkAccessManager _manager;
-    QNetworkReply* _reply = nullptr;
     QList<QNetworkReply *> currentDownloads; //??...
     
     QHash<QString, QImage*> _emoteTable;
+    QList<ChatMessage> msgQueue;
 
     void parseCommand(QString cmd);
     QString getParamValue(QString params, QString param);
@@ -120,6 +157,7 @@ private:
     QString room;
     QMap<QString, QString> badges;
     bool logged_in;
+    int activeDownloadCount;
 };
 
 #endif // IRCCHAT_H

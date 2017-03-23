@@ -201,7 +201,7 @@ Item {
         }
 
         onMessageReceived: {
-            console.log("ChatView chat override onMessageReceived; typeof message " + typeof(message) + " toString: " + message.toString())
+            //console.log("ChatView chat override onMessageReceived; typeof message " + typeof(message) + " toString: " + message.toString())
 
             if (chatColor != "") {
                 colors[user] = chatColor;
@@ -213,7 +213,7 @@ Item {
 
             // ListElement doesn't support putting in an array value, ugh.
             var serializedMessage = JSON.stringify(message);
-            console.log("Sending: " + serializedMessage);
+            //console.log("Sending: " + serializedMessage);
             chatModel.append({"user": user, "message": serializedMessage})
             list.scrollbuf = 6
         }
