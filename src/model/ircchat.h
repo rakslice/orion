@@ -111,9 +111,10 @@ public:
     //emote download
     QDir emoteDir;
     QString emoteDirPathImpl;
-    bool download_emotes(QString);
+    bool downloadEmotes(QString);
     QHash<QString, QImage*> emoteTable();
-    void loadEmoteImageFile(QString filename);
+    QSet<QString> emotesCurrentlyDownloading;
+    void loadEmoteImageFile(QString key, QString filename);
 
     void RegisterEngineProviders(QQmlEngine & engine);
 
