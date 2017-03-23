@@ -39,6 +39,31 @@ const QString HOST = "irc.twitch.tv";
 
 //#define TWITCH_EMOTE_URI "https://static-cdn.jtvnw.net/emoticons/v1/%d/1.0"
 
+struct ChatMessage {
+    QString name;
+    QVariantList messageList;
+    QString color;
+    bool subscriber;
+    bool turbo;
+};
+
+// Handles state for an individual download
+class DownloadHandler : public QObject
+{
+    Q_OBJECT
+public:
+    DownloadHandler(QString filename);
+private:
+    QString filename;
+    QFile _file;
+
+signals:
+    void downloadComplete(QString filename);
+
+public slots:
+    void dataAvailable();
+    void replyFinished();
+};
 // Backend for chat
 class IrcChat : public QObject
 {
@@ -77,6 +102,7 @@ public:
     QString emoteDirPathImpl;
     bool download_emotes(QString);
     QHash<QString, QImage*> emoteTable();
+    void loadEmoteImageFile(QString filename);
 
 signals:
     void errorOccured(QString errorDescription);
@@ -94,9 +120,7 @@ public slots:
     void sendMessage(const QString &msg);
     void onSockStateChanged();
     void login();
-
-    void dataAvailable();
-    void replyFinished();
+    void individualDownloadComplete(QString filename);
 
 private slots:
     void createConnection();
@@ -106,14 +130,12 @@ private slots:
 private:
     //some kind of emote table
     //downloader for emotes
-    QFile _file;
     QByteArray _data;
     QNetworkAccessManager _manager;
-    QNetworkReply* _reply = nullptr;
     QList<QNetworkReply *> currentDownloads; //??...
     
     QHash<QString, QImage*> _emoteTable;
-    QVariantList msgQueue;
+    QList<ChatMessage> msgQueue;
 
     void parseCommand(QString cmd);
     QString getParamValue(QString params, QString param);
@@ -121,6 +143,7 @@ private:
     QString room;
     QMap<QString, QString> badges;
     bool logged_in;
+    int activeDownloadCount;
 };
 
 #endif // IRCCHAT_H
