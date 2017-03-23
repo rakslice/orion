@@ -57,14 +57,7 @@ Item {
             console.log("cur mlist entry " + j.toString() + " typeof is " + typeof(mlist));
             if (typeof(mlist) == "number") {
                 // it's an emote
-                /*
-                var localPath = emoteDirPath + "/" + mlist.toString() + ".png";
-                if (localPath.charAt(1) == ":") {
-                    localPath = localPath.charAt(0) + localPath.substring(2);
-                }
-                var imgUrl = "file:///" + encodeURI(localPath);
-                */
-                var imgUrl = "https://static-cdn.jtvnw.net/emoticons/v1/" + mlist.toString() + "/1.0";
+                var imgUrl = emoteDirPath + "/" + mlist.toString();
 
                 _text.text += "<img src=\"" + imgUrl + "\"></img>";
 
@@ -142,11 +135,7 @@ Item {
     property Component imgThing: Component {
       Image {
         Component.onCompleted: {
-          var localPath = emoteDirPath + "/" + msgItem.toString() + ".png";
-          if (localPath.charAt(1) == ":") {
-              localPath = localPath.charAt(0) + localPath.substring(2);
-          }
-          source = "file:///" + encodeURI(localPath);
+          source = "image://emote/" + msgItem.toString();
         }
         asynchronous: true
       }
