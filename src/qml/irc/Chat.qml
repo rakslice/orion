@@ -29,6 +29,10 @@ Item {
     property var channel: undefined
     property var singleShot: undefined
 
+    Component.onCompleted: {
+        chat.initProviders()
+    }
+
     Connections {
         target: g_cman
 

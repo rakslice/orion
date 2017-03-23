@@ -29,6 +29,8 @@
 #include <QStandardPaths>
 #include <QImage>
 
+const QString IMAGE_PROVIDER_EMOTE = "emote";
+
 IrcChat::IrcChat(QObject *parent) :
     QObject(parent) {
 
@@ -55,6 +57,16 @@ IrcChat::IrcChat(QObject *parent) :
 	emoteDirPathImpl = emoteDir.absolutePath();
 
 	activeDownloadCount = 0;
+}
+
+void IrcChat::initProviders() {
+	auto engine = qmlEngine(this);
+	RegisterEngineProviders(*engine);
+}
+
+void IrcChat::RegisterEngineProviders(QQmlEngine & engine) {
+	auto provider = new CachedImageProvider(_emoteTable);
+	engine.addImageProvider(IMAGE_PROVIDER_EMOTE, provider);
 }
 
 IrcChat::~IrcChat() { disconnect(); }
