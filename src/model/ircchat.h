@@ -31,6 +31,7 @@
 #include <QFile>
 #include <QHash>
 #include <QDir>
+#include <QQuickImageProvider>
 //#include "messagelistmodel.h"
 //#include "message.h"
 
