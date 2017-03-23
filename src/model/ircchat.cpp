@@ -258,7 +258,7 @@ void IrcChat::parseCommand(QString cmd) {
           for(auto emote : emoteList) {
             auto key = emote.left(emote.indexOf(':'));
             auto positions = emote.remove(0, emote.indexOf(':')+1);
-            qDebug() << "key " << key;
+            //qDebug() << "key " << key;
 			if (!emotesCurrentlyDownloading.contains(key)) {
 				// if this emote isn't already downloading, it's safe to load the cache file or download if not in the cache
                 if (downloadEmotes(key)) {
@@ -296,7 +296,7 @@ void IrcChat::parseCommand(QString cmd) {
             messageList.append(message.mid(cur, message.length() - cur).toHtmlEscaped());
         }
 
-        qDebug() << "messageList " << messageList;
+        //qDebug() << "messageList " << messageList;
         if (displayName.length() > 0) {
             nickname = displayName;
         }
@@ -366,7 +366,7 @@ CachedImageProvider::CachedImageProvider(QHash<QString, QImage*> & imageTable) :
 }
 
 QImage CachedImageProvider::requestImage(const QString &id, QSize * size, const QSize & requestedSize) {
-	qDebug() << "Requested id " << id << " from image provider";
+	//qDebug() << "Requested id" << id << "from image provider";
 	QImage * entry = NULL;
 	auto result = imageTable.find(id);
 	if (result != imageTable.end()) {
@@ -384,7 +384,7 @@ QImage CachedImageProvider::requestImage(const QString &id, QSize * size, const 
 DownloadHandler::DownloadHandler(QString filename) : filename(filename) {
     _file.setFileName(filename);
     _file.open(QFile::WriteOnly);
-	qDebug() << "starting download of " << filename;
+	qDebug() << "starting download of" << filename;
 }
 
 void DownloadHandler::dataAvailable() {
@@ -400,7 +400,7 @@ void DownloadHandler::replyFinished() {
 	_file.close();
     //qDebug() << _file.fileName();
     //might need something for windows for the forwardslash..
-    qDebug() << "download of " << _file.fileName() << "complete";
+    qDebug() << "download of" << _file.fileName() << "complete";
 
     emit downloadComplete(_file.fileName());
   }
@@ -421,13 +421,13 @@ void IrcChat::individualDownloadComplete(QString filename) {
     
 	if (activeDownloadCount > 0) {
 		activeDownloadCount--;
-		qDebug() << activeDownloadCount << " active downloads remaining";
+		qDebug() << activeDownloadCount << "active downloads remaining";
 	}
     
 	emotesCurrentlyDownloading.remove(emoteKey);
 
 	if (activeDownloadCount == 0) {
-		qDebug() << "Download queue complete; posting pending messages";
+		//qDebug() << "Download queue complete; posting pending messages";
 		while (!msgQueue.empty()) {
 			ChatMessage tmpMsg = msgQueue.first();
 			emit messageReceived(tmpMsg.name, tmpMsg.messageList, tmpMsg.color, tmpMsg.subscriber, tmpMsg.turbo);
