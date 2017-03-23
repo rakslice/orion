@@ -54,7 +54,7 @@ IrcChat::IrcChat(QObject *parent) :
     room = "";
 
 	emoteDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes"));
-	emoteDirPathImpl = emoteDir.absolutePath();
+	emoteDirPathImpl = "image://" + IMAGE_PROVIDER_EMOTE;
 
 	activeDownloadCount = 0;
 }
