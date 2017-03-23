@@ -30,6 +30,7 @@
 #include <QImage>
 
 const QString IMAGE_PROVIDER_EMOTE = "emote";
+const QString EMOTICONS_URL_FORMAT = "https://static-cdn.jtvnw.net/emoticons/v1/%1/1.0";
 
 IrcChat::IrcChat(QObject *parent) :
     QObject(parent) {
@@ -49,8 +50,6 @@ IrcChat::IrcChat(QObject *parent) :
     connect(sock, SIGNAL(connected()), this, SLOT(onSockStateChanged()));
     connect(sock, SIGNAL(disconnected()), this, SLOT(onSockStateChanged()));
 
-
-    //download_emotes();
     room = "";
 
 	emoteDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QString("/emotes"));
@@ -82,12 +81,10 @@ void IrcChat::join(const QString channel) {
     if (!connected()) {
         reopenSocket();
     }
-
+    
     // Join channel's chat room
     sock->write(("JOIN #" + channel + "\r\n").toStdString().c_str());
-
-
-
+    
     qDebug() << "Joined channel " << channel;
 }
 
@@ -260,11 +257,11 @@ void IrcChat::parseCommand(QString cmd) {
 
           for(auto emote : emoteList) {
             auto key = emote.left(emote.indexOf(':'));
-            emote.remove(0, emote.indexOf(':')+1);
+            auto positions = emote.remove(0, emote.indexOf(':')+1);
             qDebug() << "key " << key;
 			if (!emotesCurrentlyDownloading.contains(key)) {
-				// if this emote isn't already downloading, it's safe to load the file or download if necessary
-				if (download_emotes(key)) {
+				// if this emote isn't already downloading, it's safe to load the cache file or download if not in the cache
+                if (downloadEmotes(key)) {
 					emotesCurrentlyDownloading.insert(key);
 					activeDownloadCount += 1;
 				}
@@ -272,7 +269,7 @@ void IrcChat::parseCommand(QString cmd) {
 			else {
 				qDebug() << "download of " << key << " already in progress";
 			}
-            for(auto emotePlc : emote.split(',')) {
+			for(auto emotePlc : positions.split(',')) {
               auto firstAndLast = emotePlc.split('-');
               int first = firstAndLast[0].toInt();
               int last = firstAndLast.length() > 1 ? firstAndLast[1].toInt() : first;
@@ -330,13 +327,13 @@ QString IrcChat::getParamValue(QString params, QString param) {
     return paramValue;
 }
 
-bool IrcChat::download_emotes(QString key) {
+bool IrcChat::downloadEmotes(QString key) {
     if(_emoteTable.contains(key)) {
       qDebug() << "already in the table";
         return false;
     }
-
-    QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
+    
+    QUrl url = EMOTICONS_URL_FORMAT.arg(key);
     emoteDir.mkpath(".");
 
     QString filename = emoteDir.absoluteFilePath(key + ".png");
