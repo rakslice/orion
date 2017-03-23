@@ -203,6 +203,7 @@ void IrcChat::parseCommand(QString cmd) {
         bool subscriber = false;
         bool turbo = false;
 		QString emotes = "";
+        bool downloading = false;
 
         if (cmd.at(0) == QChar('@')) {
             // tags are present
@@ -247,7 +248,9 @@ void IrcChat::parseCommand(QString cmd) {
             auto key = emote.left(emote.indexOf(':'));
             emote.remove(0, emote.indexOf(':')+1);
             qDebug() << "key " << key;
-            //download_emotes(key);
+            if(!downloading) {
+              downloading = download_emotes(key);
+            }
             for(auto emotePlc : emote.split(',')) {
               auto firstAndLast = emotePlc.split('-');
               int first = firstAndLast[0].toInt();
@@ -280,7 +283,13 @@ void IrcChat::parseCommand(QString cmd) {
             nickname = displayName;
         }
 
-        emit messageReceived(nickname, messageList, color, subscriber, turbo);
+        if(!downloading) {
+          emit messageReceived(nickname, messageList, color, subscriber, turbo);
+        }
+        else {
+          QVariantList mylist {nickname, messageList, color, subscriber, turbo};
+          msgQueue.append(mylist);
+        }
         return;
     }
     if(cmd.contains("NOTICE")) {
@@ -310,14 +319,15 @@ bool IrcChat::download_emotes(QString key) {
     QUrl url = QString("https://static-cdn.jtvnw.net/emoticons/v1/") + QString(key) + QString("/1.0");
     emoteDir.mkpath(".");
 
+    if(emoteDir.exists(key + ".png")) {
+      return false;
+    }
     _file.setFileName(emoteDir.absoluteFilePath(key + ".png"));
     _file.open(QFile::WriteOnly);
 
     QNetworkRequest request(url);
     _reply = _manager.get(request);
 
-    //emote_table.insert(key, );
-    
     connect(_reply, &QNetworkReply::readyRead,
       this, &IrcChat::dataAvailable);
     connect(_reply, &QNetworkReply::finished,
@@ -336,12 +346,16 @@ void IrcChat::replyFinished() {
     _reply->deleteLater();
     QImage* emoteImg = new QImage();
     emoteImg->load(_file.fileName());
-    qDebug() << _file.fileName();
+    //qDebug() << _file.fileName();
     //might need something for windows for the forwardslash..
     _emoteTable.insert(_file.fileName().left(_file.fileName().indexOf(".png")).remove(0, _file.fileName().lastIndexOf('/') + 1), emoteImg);
 
     _file.close();
     _reply = nullptr;
+
+    auto tmpMsg = qvariant_cast<QVariantList>(msgQueue[0]);
+    //emit messageReceived(tmpMsg[0].toString(), qvariant_cast<QVariantList>(tmpMsg[1]), tmpMsg[2].toString(), tmpMsg[3].toBool(), tmpMsg[3].toBool());
+    //msgQueue.pop_front();
     emit downloadComplete();
   }
 }

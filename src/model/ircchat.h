@@ -113,6 +113,7 @@ private:
     QList<QNetworkReply *> currentDownloads; //??...
     
     QHash<QString, QImage*> _emoteTable;
+    QVariantList msgQueue;
 
     void parseCommand(QString cmd);
     QString getParamValue(QString params, QString param);
