@@ -31,6 +31,7 @@
 #include <QFile>
 #include <QHash>
 #include <QDir>
+#include <QQuickImageProvider>
 //#include "messagelistmodel.h"
 //#include "message.h"
 
@@ -64,6 +65,15 @@ public slots:
     void dataAvailable();
     void replyFinished();
 };
+
+class CachedImageProvider : public QQuickImageProvider {
+public:
+    CachedImageProvider(QHash<QString, QImage*> & imageTable);
+    QImage requestImage(const QString &id, QSize * size, const QSize & requestedSize);
+private:
+    QHash<QString, QImage*> & imageTable;
+};
+
 // Backend for chat
 class IrcChat : public QObject
 {

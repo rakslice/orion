@@ -345,6 +345,26 @@ bool IrcChat::download_emotes(QString key) {
     return true;
 }
 
+CachedImageProvider::CachedImageProvider(QHash<QString, QImage*> & imageTable) : QQuickImageProvider(QQuickImageProvider::Image), imageTable(imageTable) {
+
+}
+
+QImage CachedImageProvider::requestImage(const QString &id, QSize * size, const QSize & requestedSize) {
+	qDebug() << "Requested id " << id << " from image provider";
+	QImage * entry = NULL;
+	auto result = imageTable.find(id);
+	if (result != imageTable.end()) {
+		entry = *result;
+	}
+	if (entry) {
+		if (size) {
+			*size = entry->size();
+		}
+		return *entry;
+	}
+	return QImage();
+}
+
 DownloadHandler::DownloadHandler(QString filename) : filename(filename) {
     _file.setFileName(filename);
     _file.open(QFile::WriteOnly);
