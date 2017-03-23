@@ -261,8 +261,15 @@ void IrcChat::parseCommand(QString cmd) {
             auto key = emote.left(emote.indexOf(':'));
             emote.remove(0, emote.indexOf(':')+1);
             qDebug() << "key " << key;
-            if (download_emotes(key)) {
-                activeDownloadCount += 1;
+			if (!emotesCurrentlyDownloading.contains(key)) {
+				// if this emote isn't already downloading, it's safe to load the file or download if necessary
+				if (download_emotes(key)) {
+					emotesCurrentlyDownloading.insert(key);
+					activeDownloadCount += 1;
+				}
+			}
+			else {
+				qDebug() << "download of " << key << " already in progress";
 			}
             for(auto emotePlc : emote.split(',')) {
               auto firstAndLast = emotePlc.split('-');
@@ -335,7 +342,7 @@ bool IrcChat::download_emotes(QString key) {
 
     if(emoteDir.exists(key + ".png")) {
         qDebug() << "local file already exists";
-		loadEmoteImageFile(filename);
+		loadEmoteImageFile(key, filename);
         return false;
     }
 	qDebug() << "downloading";
@@ -401,10 +408,9 @@ void DownloadHandler::replyFinished() {
   }
 }
 
-void IrcChat::loadEmoteImageFile(QString filename) {
+void IrcChat::loadEmoteImageFile(QString emoteKey, QString filename) {
     QImage* emoteImg = new QImage();
     emoteImg->load(filename);
-	QString emoteKey = filename.left(filename.indexOf(".png")).remove(0, filename.lastIndexOf('/') + 1);
     _emoteTable.insert(emoteKey, emoteImg);
 }
 
@@ -412,12 +418,15 @@ void IrcChat::individualDownloadComplete(QString filename) {
     DownloadHandler * dh = qobject_cast<DownloadHandler*>(sender());
     delete dh;
     
-	loadEmoteImageFile(filename);
+    QString emoteKey = filename.left(filename.indexOf(".png")).remove(0, filename.lastIndexOf('/') + 1);
+    loadEmoteImageFile(emoteKey, filename);
     
 	if (activeDownloadCount > 0) {
 		activeDownloadCount--;
 		qDebug() << activeDownloadCount << " active downloads remaining";
 	}
+    
+	emotesCurrentlyDownloading.remove(emoteKey);
 
 	if (activeDownloadCount == 0) {
 		qDebug() << "Download queue complete; posting pending messages";
