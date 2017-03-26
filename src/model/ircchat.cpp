@@ -133,10 +133,18 @@ bool IrcChat::connected() {
 void IrcChat::sendMessage(const QString &msg) {
     if (inRoom() && connected()) {
         sock->write(("PRIVMSG #" + room + " :" + msg + "\r\n").toStdString().c_str());
-        QVariantList message;
-        message.append(msg);
+
+		bool isAction = false;
+		QVariantList message;
+		const QString ME_PREFIX = "/me ";
+		QString displayMessage = msg;
+		if (displayMessage.startsWith(ME_PREFIX)) {
+			isAction = true;
+			displayMessage = displayMessage.mid(ME_PREFIX.length());
+		}
+		message.append(displayMessage.toHtmlEscaped());
         //TODO need the user's status info to show here
-        emit messageReceived(username, message, "", false, false);
+        emit messageReceived(username, message, "", false, false, isAction);
     }
 }
 
@@ -279,6 +287,17 @@ void IrcChat::parseCommand(QString cmd) {
           }
         }
 
+		bool isAction = false;
+		
+		// parse IRC action before applying emotes, as emote indices are relative to the content of the action
+		const QString ACTION_PREFIX = QString(QChar(1)) + "ACTION ";
+		const QString ACTION_SUFFIX = QString(QChar(1));
+		if (message.startsWith(ACTION_PREFIX) && message.endsWith(ACTION_SUFFIX)) {
+			isAction = true;
+			message = message.mid(ACTION_PREFIX.length(), message.length() - ACTION_SUFFIX.length() - ACTION_PREFIX.length());
+		}
+
+		// cut up message into an ordered list of text fragments and emotes
         QVariantList messageList;
 
         int cur = 0;
@@ -302,11 +321,11 @@ void IrcChat::parseCommand(QString cmd) {
         }
 
         if(activeDownloadCount == 0) {
-          emit messageReceived(nickname, messageList, color, subscriber, turbo);
+          emit messageReceived(nickname, messageList, color, subscriber, turbo, isAction);
         }
         else {
           // queue message to be shown when downloads are complete
-		  msgQueue.push_back({nickname, messageList, color, subscriber, turbo});
+		  msgQueue.push_back({nickname, messageList, color, subscriber, turbo, isAction});
         }
         return;
     }
@@ -430,7 +449,7 @@ void IrcChat::individualDownloadComplete(QString filename) {
 		//qDebug() << "Download queue complete; posting pending messages";
 		while (!msgQueue.empty()) {
 			ChatMessage tmpMsg = msgQueue.first();
-			emit messageReceived(tmpMsg.name, tmpMsg.messageList, tmpMsg.color, tmpMsg.subscriber, tmpMsg.turbo);
+			emit messageReceived(tmpMsg.name, tmpMsg.messageList, tmpMsg.color, tmpMsg.subscriber, tmpMsg.turbo, tmpMsg.isAction);
 			msgQueue.pop_front();
 		}
 	}

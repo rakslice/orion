@@ -19,6 +19,7 @@ Item {
     id: root
     property string user
     property string msg
+    property bool isAction
     property string emoteDirPath
     property int fontSize: Styles.titleFont.smaller
 
@@ -31,11 +32,19 @@ Item {
 
         if (rmsg)
         {
-            _text.text = "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>".arg(user) + (rmsg ? ": " : "")
-            parseMsg(rmsg)
-        }
-        else
+            _text.text = "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a>".arg(user);
+            if (isAction) {
+                _text.text += " ";
+                parseMsg(rmsg);
+            }
+            _text.text += "</font>";
+            if (!isAction) {
+                _text.text += ": ";
+                parseMsg(rmsg)
+            }
+        } else {
             _text.text = "<font color=\"#FFFFFF\"><b>%1</b></font>".arg(user) + (rmsg ? ": " : "")
+        }
         _text.user = user
     }
 

@@ -46,6 +46,7 @@ struct ChatMessage {
     QString color;
     bool subscriber;
     bool turbo;
+    bool isAction;
 };
 
 // Handles state for an individual download
@@ -122,7 +123,7 @@ signals:
     void errorOccured(QString errorDescription);
     void connectedChanged();
     void anonymousChanged();
-    void messageReceived(QString user, QVariantList message, QString chatColor, bool subscriber, bool turbo);
+    void messageReceived(QString user, QVariantList message, QString chatColor, bool subscriber, bool turbo, bool isAction);
     void noticeReceived(QString message);
     void emoteTableChanged();
 
