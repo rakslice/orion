@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         app.setFont(QFont(":/fonts/NotoSans-Regular.ttf", 10, QFont::Normal, false));
 
 #ifndef  QT_DEBUG
-    //qInstallMessageHandler(noisyFailureMsgHandler);
+    qInstallMessageHandler(noisyFailureMsgHandler);
 #endif
     app.setWindowIcon(appIcon);
 
