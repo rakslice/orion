@@ -31,7 +31,7 @@ Item{
         }
     }
 
-    ChannelGrid {
+    CommonGrid {
         id: favourites
         tooltipEnabled: true
 

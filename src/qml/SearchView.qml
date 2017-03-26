@@ -176,7 +176,7 @@ Item {
         }
     }
 
-    ChannelGrid {
+    CommonGrid {
         id: channels
         tooltipEnabled: true
 

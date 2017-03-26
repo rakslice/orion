@@ -25,7 +25,7 @@ Item {
         z: featured.z + 1
     }
 
-    ChannelGrid {
+    CommonGrid {
         property bool checked: false
 
         id: featured
