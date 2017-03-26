@@ -372,6 +372,8 @@ bool IrcChat::downloadEmotes(QString key) {
 
     connect(_reply, &QNetworkReply::readyRead,
       dh, &DownloadHandler::dataAvailable);
+    connect(_reply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+      dh, &DownloadHandler::error);
     connect(_reply, &QNetworkReply::finished,
       dh, &DownloadHandler::replyFinished);
 	connect(dh, &DownloadHandler::downloadComplete,
@@ -400,7 +402,7 @@ QImage CachedImageProvider::requestImage(const QString &id, QSize * size, const 
 	return QImage();
 }
 
-DownloadHandler::DownloadHandler(QString filename) : filename(filename) {
+DownloadHandler::DownloadHandler(QString filename) : filename(filename), hadError(false) {
     _file.setFileName(filename);
     _file.open(QFile::WriteOnly);
 	qDebug() << "starting download of" << filename;
@@ -412,6 +414,12 @@ void DownloadHandler::dataAvailable() {
   _file.write(buffer.data(), buffer.size());
 }
 
+void DownloadHandler::error(QNetworkReply::NetworkError code) {
+  hadError = true;
+  QNetworkReply* _reply = qobject_cast<QNetworkReply*>(sender());
+  qDebug() << "Network error downloading" << filename << ":" << _reply->errorString();
+}
+
 void DownloadHandler::replyFinished() {
   QNetworkReply* _reply = qobject_cast<QNetworkReply*>(sender());
   if(_reply) {
@@ -421,7 +429,7 @@ void DownloadHandler::replyFinished() {
     //might need something for windows for the forwardslash..
     qDebug() << "download of" << _file.fileName() << "complete";
 
-    emit downloadComplete(_file.fileName());
+    emit downloadComplete(_file.fileName(), hadError);
   }
 }
 
@@ -431,12 +439,17 @@ void IrcChat::loadEmoteImageFile(QString emoteKey, QString filename) {
     _emoteTable.insert(emoteKey, emoteImg);
 }
 
-void IrcChat::individualDownloadComplete(QString filename) {
+void IrcChat::individualDownloadComplete(QString filename, bool hadError) {
     DownloadHandler * dh = qobject_cast<DownloadHandler*>(sender());
     delete dh;
     
-    QString emoteKey = filename.left(filename.indexOf(".png")).remove(0, filename.lastIndexOf('/') + 1);
-    loadEmoteImageFile(emoteKey, filename);
+	QString emoteKey = filename.left(filename.indexOf(".png")).remove(0, filename.lastIndexOf('/') + 1);
+	if (hadError) {
+		// delete partial download if any
+		QFile(filename).remove();
+	} else {
+		loadEmoteImageFile(emoteKey, filename);
+	}
     
 	if (activeDownloadCount > 0) {
 		activeDownloadCount--;

@@ -58,13 +58,15 @@ public:
 private:
     QString filename;
     QFile _file;
+    bool hadError;
 
 signals:
-    void downloadComplete(QString filename);
+    void downloadComplete(QString filename, bool hadError);
 
 public slots:
     void dataAvailable();
     void replyFinished();
+    void error(QNetworkReply::NetworkError code);
 };
 
 class CachedImageProvider : public QQuickImageProvider {
@@ -135,7 +137,7 @@ public slots:
     void sendMessage(const QString &msg);
     void onSockStateChanged();
     void login();
-    void individualDownloadComplete(QString filename);
+    void individualDownloadComplete(QString filename, bool hadError);
 
 private slots:
     void createConnection();
