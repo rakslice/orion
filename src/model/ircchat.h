@@ -155,6 +155,7 @@ private:
     QList<ChatMessage> msgQueue;
 
     void parseCommand(QString cmd);
+    void addWordSplit(const QString & s, const QChar & sep, QVariantList & l);
     QString getParamValue(QString params, QString param);
     QTcpSocket *sock;
     QString room;

@@ -99,7 +99,7 @@ Item {
         return str.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z]{2,6})([\/\w \.-]*)*\/?$/)
     }
 
-    Row {
+    Flow {
       anchors {
           left: parent.left
           right: parent.right
