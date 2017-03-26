@@ -98,6 +98,7 @@ Item {
         delegate: ChatMessage {
             user: model.user
             msg: model.message
+            isAction: model.isAction
             emoteDirPath: chat.emoteDirPath
 
             anchors {
@@ -214,7 +215,7 @@ Item {
             // ListElement doesn't support putting in an array value, ugh.
             var serializedMessage = JSON.stringify(message);
             //console.log("Sending: " + serializedMessage);
-            chatModel.append({"user": user, "message": serializedMessage})
+            chatModel.append({"user": user, "message": serializedMessage, "isAction": isAction})
             list.scrollbuf = 6
         }
 

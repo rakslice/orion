@@ -20,6 +20,7 @@ Item {
     id: root
     property string user
     property var msg
+    property bool isAction
     property string emoteDirPath
     property int fontSize: Styles.titleFont.smaller
     property var pmsg: JSON.parse(msg)
@@ -34,8 +35,18 @@ Item {
 
         if (rmsg)
         {
-            _text.text = "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>".arg(user) + (rmsg ? ": " : "")
-            parseMsg(rmsg)
+            if (isAction) {
+            } else {
+            _text.text = "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a>".arg(user);
+            if (isAction) {
+                _text.text += " ";
+                parseMsg(rmsg);
+            }
+            _text.text += "</font>";
+            if (!isAction) {
+                _text.text += ": ";
+                parseMsg(rmsg)
+            }
         }
         else
             _text.text = "<font color=\"#FFFFFF\"><b>%1</b></font>".arg(user) + (rmsg ? ": " : "")
@@ -99,7 +110,7 @@ Item {
         verticalAlignment: Text.AlignVCenter
         color: Styles.textColor
         font.pixelSize: fontSize
-        text: "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>: ".arg(user)
+        text: "<font color=\""+chat.colors[user]+"\"><a href=\"user:%1\"><b>%1</b></a></font>".arg(user) + (isAction? "&nbsp;": ":&nbsp;")
       }
 
       Repeater {
@@ -126,7 +137,7 @@ Item {
     property Component msgText: Component {
       Text {
         verticalAlignment: Text.AlignVCenter
-        color: Styles.textColor
+        color: isAction? chat.colors[user] : Styles.textColor
         font.pixelSize: fontSize
         text: msgItem
         wrapMode: Text.WordWrap
