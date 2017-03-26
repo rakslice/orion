@@ -234,7 +234,6 @@ void IrcChat::parseCommand(QString cmd) {
         QString color = "";
         bool subscriber = false;
         bool turbo = false;
-        bool downloading = false;
         QString emotes = "";
 
         if (cmd.at(0) == QChar('@')) {

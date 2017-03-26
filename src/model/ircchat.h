@@ -147,9 +147,7 @@ private slots:
 private:
     //some kind of emote table
     //downloader for emotes
-    QByteArray _data;
     QNetworkAccessManager _manager;
-    QList<QNetworkReply *> currentDownloads; //??...
     
     QHash<QString, QImage*> _emoteTable;
     QList<ChatMessage> msgQueue;
@@ -159,7 +157,6 @@ private:
     QString getParamValue(QString params, QString param);
     QTcpSocket *sock;
     QString room;
-    QMap<QString, QString> badges;
     bool logged_in;
     int activeDownloadCount;
 };
