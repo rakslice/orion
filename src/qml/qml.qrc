@@ -53,6 +53,7 @@
         <file>irc/ChatMessage.qml</file>
         <file>MpvBackend.qml</file>
         <file>IconButton.qml</file>
+        <file>components/GridPicker.qml</file>
         <file>components/CommonGrid.qml</file>
         <file>components/ChannelGrid.qml</file>
     </qresource>
