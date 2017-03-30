@@ -117,12 +117,6 @@ Item {
         model: pmsg
 
         Loader {
-            /*
-          height: typeof pmsg[index] == "string" ? 
-                    fontSize : 25
-          width: if(typeof pmsg[index] != "string")
-                    return 25
-                    */
           property var msgItem: pmsg[index]
           sourceComponent: {
             if(typeof pmsg[index] == "string") {
@@ -143,6 +137,7 @@ Item {
         font.pixelSize: fontSize
         text: msgItem
         wrapMode: Text.WordWrap
+        textFormat: Text.PlainText
       }
     }
     property Component imgThing: Component {
