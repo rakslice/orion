@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>components/Channel.qml</file>
-        <file>components/ChannelGrid.qml</file>
         <file>components/Tooltip.qml</file>
         <file>styles.js</file>
         <file>components/PurpleButton.qml</file>
@@ -55,5 +54,7 @@
         <file>MpvBackend.qml</file>
         <file>IconButton.qml</file>
         <file>components/GridPicker.qml</file>
+        <file>components/CommonGrid.qml</file>
+        <file>components/ChannelGrid.qml</file>
     </qresource>
 </RCC>
