@@ -139,7 +139,36 @@ bool IrcChat::connected() {
     return sock->state() == QTcpSocket::ConnectedState;
 }
 
-void IrcChat::sendMessage(const QString &msg) {
+QVariantMap createEmoteEntry(int emoteId, QString emoteText) {
+    QVariantMap emoteObj;
+    emoteObj.insert("emoteId", emoteId);
+    emoteObj.insert("emoteText", emoteText);
+    return emoteObj;
+}
+
+QVariantList IrcChat::substituteEmotesInMessage(const QVariantList & message, const QVariantMap &relevantEmotes) {
+    QVariantList output;
+
+    for (auto word = message.begin(); word != message.end(); word++) {
+        bool spacePrefix = word != message.begin();
+        QString emoteText = spacePrefix ? word->toString().mid(1) : word->toString();
+        auto entry = relevantEmotes.find(emoteText);
+        if (entry != relevantEmotes.end()) {
+            int emoteId = entry.value().toInt();
+            makeEmoteAvailable(QString::number(emoteId));
+            if (spacePrefix) {
+                output.append(" ");
+            }
+            output.append(createEmoteEntry(emoteId, emoteText));
+        }
+        else {
+            output.append(*word);
+        }
+    }
+    return output;
+}
+
+void IrcChat::sendMessage(const QString &msg, const QVariantMap &relevantEmotes) {
     if (inRoom() && connected()) {
         sock->write(("PRIVMSG #" + room + " :" + msg + "\r\n").toStdString().c_str());
 
@@ -152,8 +181,9 @@ void IrcChat::sendMessage(const QString &msg) {
 			displayMessage = displayMessage.mid(ME_PREFIX.length());
 		}
 		addWordSplit(displayMessage, ' ', message);
+        message = substituteEmotesInMessage(message, relevantEmotes);
         //TODO need the user's status info to show here
-        emit messageReceived(username, message, "", false, false, isAction);
+        disposeOfMessage(username, message, "", false, false, isAction);
     }
 }
 
@@ -230,6 +260,16 @@ void IrcChat::addWordSplit(const QString & s, const QChar & sep, QVariantList & 
 	}
 }
 
+void IrcChat::disposeOfMessage(QString nickname, QVariantList messageList, QString color, bool subscriber, bool turbo, bool isAction) {
+    if (activeDownloadCount == 0) {
+        emit messageReceived(nickname, messageList, color, subscriber, turbo, isAction);
+    }
+    else {
+        // queue message to be shown when downloads are complete
+        msgQueue.push_back({ nickname, messageList, color, subscriber, turbo, isAction });
+    }
+}
+
 void IrcChat::parseCommand(QString cmd) {
     if(cmd.startsWith("PING ")) {
         sock->write("PONG\r\n");
@@ -288,16 +328,9 @@ void IrcChat::parseCommand(QString cmd) {
             auto key = emote.left(emote.indexOf(':'));
             auto positions = emote.remove(0, emote.indexOf(':')+1);
             //qDebug() << "key " << key;
-			if (!emotesCurrentlyDownloading.contains(key)) {
-				// if this emote isn't already downloading, it's safe to load the cache file or download if not in the cache
-                if (downloadEmotes(key)) {
-					emotesCurrentlyDownloading.insert(key);
-					activeDownloadCount += 1;
-				}
-			}
-			else {
-				qDebug() << "download of " << key << " already in progress";
-			}
+
+            makeEmoteAvailable(key);
+
 			for(auto emotePlc : positions.split(',')) {
               auto firstAndLast = emotePlc.split('-');
               int first = firstAndLast[0].toInt();
@@ -330,10 +363,7 @@ void IrcChat::parseCommand(QString cmd) {
             auto emoteEnd = i.value().first;
             auto emoteId = i.value().second;
             QString emoteText = message.mid(emoteStart, emoteEnd - emoteStart + 1);
-            QVariantMap emoteObj;
-            emoteObj.insert("emoteId", emoteId);
-            emoteObj.insert("emoteText", emoteText);
-            messageList.append(emoteObj);
+            messageList.append(createEmoteEntry(emoteId, emoteText));
             cur = emoteEnd + 1;
         }
         if (cur < message.length()) {
@@ -345,13 +375,7 @@ void IrcChat::parseCommand(QString cmd) {
             nickname = displayName;
         }
 
-        if(activeDownloadCount == 0) {
-          emit messageReceived(nickname, messageList, color, subscriber, turbo, isAction);
-        }
-        else {
-          // queue message to be shown when downloads are complete
-		  msgQueue.push_back({nickname, messageList, color, subscriber, turbo, isAction});
-        }
+        disposeOfMessage(nickname, messageList, color, subscriber, turbo, isAction);
         return;
     }
     if(cmd.contains("NOTICE")) {
@@ -435,19 +459,30 @@ bool IrcChat::downloadEmotes(QString key) {
     return true;
 }
 
+bool IrcChat::makeEmoteAvailable(QString key) {
+    /* Make emote available by downloading it or loading it from cache if not already loaded.
+     * Returns true if caller should wait for a downloadComplete event before using the emote */
+    if (emotesCurrentlyDownloading.contains(key)) {
+        // download of this emote in progress
+        return true;
+    }
+    else if (downloadEmotes(key)) {
+        // if this emote isn't already downloading, it's safe to load the cache file or download if not in the cache
+        emotesCurrentlyDownloading.insert(key);
+        activeDownloadCount += 1;
+        return true;
+    }
+    else {
+        // we already had the emote locally and don't need to wait for it to download
+        return false;
+    }
+}
+
 bool IrcChat::bulkDownloadEmotes(QList<QString> emoteIDs) {
     bool waitForDownloadComplete = false;
     for (auto key : emoteIDs) {
-        if (emotesCurrentlyDownloading.contains(key)) {
-            // download of this emote in progress
+        if (makeEmoteAvailable(key)) {
             waitForDownloadComplete = true;
-        } else if (downloadEmotes(key)) {
-            // if this emote isn't already downloading, it's safe to load the cache file or download if not in the cache
-            emotesCurrentlyDownloading.insert(key);
-            activeDownloadCount += 1;
-            waitForDownloadComplete = true;
-        } else {
-            // we already had the emote locally and don't need to wait for it to download
         }
     }
     return waitForDownloadComplete;
