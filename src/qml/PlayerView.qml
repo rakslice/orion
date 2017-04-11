@@ -807,6 +807,7 @@ Item {
         }
 
         width: visible && !smallMode ? dp(250) : 0
+        chatWidth: dp(250)
 
         Behavior on width {
             NumberAnimation {
