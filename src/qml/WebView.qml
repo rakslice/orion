@@ -13,7 +13,8 @@
  */
 
 import QtQuick 2.0
-import QtWebEngine 1.1
+import QtWebEngine 1.4
+import QtQuick.Controls 1.4
 import "components"
 
 Item {
@@ -42,6 +43,8 @@ Item {
         id: web
         anchors.fill: parent
 
+        property bool isSelectionEditable: true
+
         onLoadingChanged: {
             if (!loading) {
                 if (requestInProgress) {
@@ -53,6 +56,44 @@ Item {
 
         onFullScreenRequested: {
             console.log("OK")
+        }
+
+        Menu {
+            id: _contextMenu
+
+            MenuItem {
+                id: _undoItem
+                action: _undoAction
+            }
+
+            MenuSeparator { }
+
+            MenuItem {
+                id: _cutItem
+                action: _cutAction
+            }
+
+            MenuItem {
+                id: _copyItem
+                action: _copyAction
+            }
+
+            MenuItem {
+                id: _pasteItem
+                action: _pasteAction
+            }
+
+            MenuSeparator { }
+
+            MenuItem {
+                id: _selectAllItem
+                action: _selectAllAction
+            }
+
+            onAboutToHide: {
+                // leave the actions bound to keys in enabled state
+                web.isSelectionEditable = true;
+            }
         }
 
         onUrlChanged: {
@@ -74,6 +115,50 @@ Item {
                 requestSelectionChange(6)
             }
         }
+
+        onContextMenuRequested: function(request) {
+            console.log("context menu popup: isContentEditable", request.isContentEditable)
+            web.isSelectionEditable = request.isContentEditable
+            request.accepted = true;
+            _contextMenu.popup();
+        }
+    }
+
+    Action {
+        id: _undoAction
+        shortcut: StandardKey.Undo
+        onTriggered: web.triggerWebAction(WebEngineView.Undo)
+        text: "&Undo"
+    }
+
+    Action {
+        id: _cutAction
+        shortcut: StandardKey.Cut
+        onTriggered: web.triggerWebAction(WebEngineView.Cut)
+        text: "Cu&t"
+        enabled: web.isSelectionEditable
+    }
+
+    Action {
+        id: _copyAction
+        shortcut: StandardKey.Copy
+        onTriggered: web.triggerWebAction(WebEngineView.Copy)
+        text: "&Copy"
+    }
+
+    Action {
+        id: _pasteAction
+        shortcut: StandardKey.Paste
+        onTriggered: web.triggerWebAction(WebEngineView.Paste)
+        text: "&Paste"
+        enabled: web.isSelectionEditable
+    }
+
+    Action {
+        id: _selectAllAction
+        shortcut: StandardKey.SelectAll
+        onTriggered: web.triggerWebAction(WebEngineView.SelectAll)
+        text: "Select &All"
     }
 }
 
