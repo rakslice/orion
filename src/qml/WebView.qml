@@ -117,7 +117,7 @@ Item {
         }
 
         onContextMenuRequested: function(request) {
-            console.log("context menu popup: isContentEditable", request.isContentEditable)
+            //console.log("context menu popup: isContentEditable", request.isContentEditable)
             web.isSelectionEditable = request.isContentEditable
             request.accepted = true;
             _contextMenu.popup();
