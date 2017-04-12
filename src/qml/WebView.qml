@@ -14,6 +14,7 @@
 
 import QtQuick 2.0
 import QtWebEngine 1.1
+import QtQuick.Controls 1.4
 import "components"
 
 Item {
@@ -41,6 +42,8 @@ Item {
     WebEngineView {
         id: web
         anchors.fill: parent
+
+        property bool isSelectionEditable: true
 
         onLoadingChanged: {
             if (!loading) {
@@ -74,6 +77,43 @@ Item {
                 requestSelectionChange(6)
             }
         }
+    }
+
+    Action {
+        id: _undoAction
+        shortcut: StandardKey.Undo
+        onTriggered: web.triggerWebAction(WebEngineView.Undo)
+        text: "&Undo"
+    }
+
+    Action {
+        id: _cutAction
+        shortcut: StandardKey.Cut
+        onTriggered: web.triggerWebAction(WebEngineView.Cut)
+        text: "Cu&t"
+        enabled: web.isSelectionEditable
+    }
+
+    Action {
+        id: _copyAction
+        shortcut: StandardKey.Copy
+        onTriggered: web.triggerWebAction(WebEngineView.Copy)
+        text: "&Copy"
+    }
+
+    Action {
+        id: _pasteAction
+        shortcut: StandardKey.Paste
+        onTriggered: web.triggerWebAction(WebEngineView.Paste)
+        text: "&Paste"
+        enabled: web.isSelectionEditable
+    }
+
+    Action {
+        id: _selectAllAction
+        shortcut: StandardKey.SelectAll
+        onTriggered: web.triggerWebAction(WebEngineView.SelectAll)
+        text: "Select &All"
     }
 }
 
