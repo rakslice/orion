@@ -12,7 +12,7 @@ install:
   - if %platform%==x86 set MPVDIR=c:\mpv_x86
   - if %platform%==x64 set MPVDIR=c:\mpv_x64
   - if not exist "%MPVDIR%" mkdir "%MPVDIR%"
-  - ps: if (!(Test-Path "c:\mpv\mpv-dev-${env:platform}.7z")) { Start-FileDownload "https://superb-sea2.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-${env:mpv_platform}-20170305-git-85c8556ee.7z" -FileName "c:\mpv\mpv-dev-${env:platform}.7z" }
+  - ps: if (!(Test-Path "${env:mpvdir}\mpv-dev-${env:platform}.7z")) { Start-FileDownload "https://superb-sea2.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-${env:mpv_platform}-20170305-git-85c8556ee.7z" -FileName "${env:mpvdir}\mpv-dev-${env:platform}.7z" }
   - set QTDIR=C:\Qt\5.8\msvc2015
   - if %platform%==x86 set PATH=%QTDIR%\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin;%PATH%
   - if %platform%==x64 set PATH=%QTDIR%\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin;%PATH%
