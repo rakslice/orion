@@ -5,6 +5,10 @@ environment:
       configuration: release
     - platform: x64
       configuration: release
+    - platform: x86
+      configuration: debug
+    - platform: x64
+      configuration: debug
 
 install:
   - set libmpv_version=20170401-git-1d2910af9
