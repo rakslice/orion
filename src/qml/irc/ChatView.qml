@@ -149,7 +149,7 @@ Item {
 
         clip: true
         highlightFollowsCurrentItem: false
-        spacing: dp(10)
+        spacing: dp(5)
         boundsBehavior: Flickable.StopAtBounds
 
         delegate: ChatMessage {
