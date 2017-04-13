@@ -60,7 +60,7 @@ IrcChat::IrcChat(QObject *parent) :
 }
 
 void IrcChat::initProviders() {
-	auto engine = qmlEngine(this);
+	auto engine = QtQml::qmlEngine(this);
 	RegisterEngineProviders(*engine);
 }
 
