@@ -18,6 +18,7 @@ import QtQuick.Controls.Styles 1.4
 import "../fonts/fontAwesome.js" as FontAwesome
 import "../styles.js" as Styles
 import "../components"
+import "../util.js" as Util
 
 Item {
     id: root
@@ -727,6 +728,8 @@ Item {
 
                 var curBadgeAdded = false;
 
+                var badgeLocalUrl = chat.getBadgeLocalUrl(badgeName + "-" + versionStr);
+
                 var badgeSetData = lastBetaBadgeSetData[badgeName];
                 if (badgeSetData != null) {
                     var versionObj = badgeSetData[versionStr];
@@ -734,7 +737,13 @@ Item {
                         console.log("  beta badge set for", badgeName, "has no version entry for", versionStr);
                         console.log("  available versions are", keysStr(badgeSetData))
                     } else {
-                        var entry = {"name": versionObj.title, "url": versionObj.image_url_1x, "click_action": versionObj.click_action, "click_url": versionObj.click_url}
+                        var devicePixelRatio = 1.0;
+                        if (Util.endsWith(badgeLocalUrl, "-image_url_2x")) {
+                            devicePixelRatio = 2.0;
+                        } else if (Util.endsWith(badgeLocalUrl, "-image_url_4x")) {
+                            devicePixelRatio = 3.0;
+                        }
+                        var entry = {"name": versionObj.title, "url": badgeLocalUrl, "click_action": versionObj.click_action, "click_url": versionObj.click_url, "devicePixelRatio": devicePixelRatio}
                         console.log("adding entry", JSON.stringify(entry));
                         badgeEntries.push(entry);
                         curBadgeAdded = true;
@@ -747,8 +756,7 @@ Item {
                     for (var j in badgeUrls) {
                         console.log("    key", j, "value", badgeUrls[j]);
                     }
-                    var url = badgeUrls[imageFormatToUse];
-                    var entry = {"name": badgeName, "url": url};
+                    var entry = {"name": badgeName, "url": badgeLocalUrl, "devicePixelRatio": 1.0};
                     console.log("adding entry", JSON.stringify(entry));
                     badgeEntries.push(entry);
                     curBadgeAdded = true;
