@@ -21,8 +21,10 @@ Window {
     id: root
     flags: Qt.SplashScreen | Qt.NoFocus | Qt.X11BypassWindowManagerHint | Qt.BypassWindowManagerHint
 
-    height: dp(320)
-    width: dp(512)
+    property real dpHeight: 320
+    property real dpWidth: 512
+    height: dp(dpHeight)
+    width: dp(dpWidth)
 
     property string text
     property string img
@@ -88,6 +90,10 @@ Window {
             root.x -= root.width + dp(40)
 
         root.y = mY
+
+        // refresh size
+        root.width = dp(root.dpWidth)
+        root.height = dp(root.dpHeight)
 
         root.show()
     }
