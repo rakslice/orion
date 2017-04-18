@@ -211,9 +211,11 @@ Item {
     }
 
     function setWatchingTitle(){
-        setHeaderText(currentChannel.title
-                      + (currentChannel.game ? " playing " + currentChannel.game : "")
-                      + (isVod ? " (VOD)" : ""))
+        var description = currentChannel.title
+                + (currentChannel.game ? " playing " + currentChannel.game : "")
+                + (isVod ? " (VOD)" : "");
+        setHeaderText(description);
+        g_rootWindow.setWindowDescription(description);
     }
 
     function loadStreams(streams) {
