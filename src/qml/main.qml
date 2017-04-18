@@ -46,6 +46,16 @@ ApplicationWindow {
         height = view.width * 0.5625
     }
 
+    function setWindowDescription(text) {
+        var baseName = title.split(" - ")[0];
+        if (text) {
+            var newAppName = baseName + " - " + text;
+            root.title = newAppName;
+        } else {
+            root.title = baseName;
+        }
+    }
+
     onClosing: {
         if (!g_cman.isCloseToTray()) {
             Qt.quit()
