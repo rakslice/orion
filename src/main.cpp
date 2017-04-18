@@ -48,12 +48,14 @@ int main(int argc, char *argv[])
 {
     CustomApp app(argc, argv);
 
+    /*
     //Single application solution
     RunGuard guard("wz0dPKqHv3vX0BBsUFZt");
     if ( !guard.tryToRun() ){
         guard.sendWakeup();
         return -1;
     }
+    */
 
     //Init engine
     QQmlApplicationEngine engine;
@@ -117,7 +119,7 @@ int main(int argc, char *argv[])
     rootContext->setContextProperty("dpiMultiplier", dpiMultiplier);
     rootContext->setContextProperty("netman", netman);
     rootContext->setContextProperty("g_cman", cman);
-    rootContext->setContextProperty("g_guard", &guard);
+    //rootContext->setContextProperty("g_guard", &guard);
     rootContext->setContextProperty("g_powerman", power);
     rootContext->setContextProperty("g_favourites", cman->getFavouritesProxy());
     rootContext->setContextProperty("g_results", cman->getResultsModel());
