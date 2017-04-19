@@ -54,7 +54,7 @@ Item {
     }
 
     function joinChannel(channel, channelId) {
-        if ("#" + channel != chat.channel) {
+        if (channel != chat.channel) {
             chatModel.clear()
             chat.joinChannel(channel, channelId)
         }
