@@ -89,6 +89,7 @@ ApplicationWindow {
         }
     }
 
+    /*
     Connections {
         target: g_guard
         onAnotherProcessTriggered: {
@@ -96,6 +97,7 @@ ApplicationWindow {
             root.raise()
         }
     }
+    */
 
     Item {
         anchors.fill: parent
