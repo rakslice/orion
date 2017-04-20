@@ -81,6 +81,8 @@ public:
     Q_INVOKABLE QString getClientId() const { return QString(CLIENT_ID); }
     Q_INVOKABLE bool networkAccess();
 
+    Q_INVOKABLE void createClip(const QString &accessToken, const QString &channelName, const QString &broadcastId, const QString &vodId, quint64 offset);
+
 signals:
     void finishedConnectionTest();
 
@@ -91,11 +93,12 @@ signals:
     void searchChannelsOperationFinished(const QList<Channel *>&);
     void searchGamesOperationFinished(const QList<Game *>&);
     void broadcastsOperationFinished(const QList<Vod *>&);
-    void m3u8OperationFinished(const QVariantMap&);
+    void m3u8OperationFinished(const QVariantMap&, const QVariantMap&);
     void m3u8OperationBFinished(const QVariantMap&);
     void fileOperationFinished(const QByteArray&);
     void favouritesReplyFinished(const QList<Channel *>&, const quint32);
     void streamGetOperationFinished(const QString channelName, const bool online);
+    void clipCreated(const QString url);
     void error(const QString &error);
 
     //oauth
@@ -125,6 +128,7 @@ private slots:
     void favouritesReply();
     void editUserFavouritesReply();
     void streamReply();
+    void createClipReply();
 
     //Oauth slots
     void userReply();

@@ -18,14 +18,48 @@
 #include <QVariantMap>
 #include <QMap>
 #include <QByteArray>
+#include <QDateTime>
 
 namespace m3u8 {
+
+    static QVariantMap getTimeInfo(const QByteArray &data) {
+        QVariantMap out;
+
+        out.insert("metadataEpochTimeMS", QDateTime::currentMSecsSinceEpoch());
+
+        const QString INFO_PREFIX = "#EXT-X-TWITCH-INFO:";
+        for (auto line : QString(data).split("\n")) {
+            if (line.startsWith(INFO_PREFIX)) {
+                for (QString entry : line.mid(INFO_PREFIX.length()).split(",")) {
+                    int eqPos = entry.indexOf('=');
+                    if (eqPos != -1) {
+                        QString key = entry.left(eqPos);
+                        QString value = entry.mid(eqPos + 1);
+                        if (value.startsWith('"') && value.endsWith('"')) {
+                            value = value.mid(1, value.length() - 2);
+                        }
+                        if (key == "STREAM-TIME") {
+                            out.insert("streamTimeS", value.toDouble());
+                        }
+                        else if (key == "BROADCAST-ID") {
+                            out.insert("broadcastId", value);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        return out;
+    }
 
     static QVariantMap getUrls(const QByteArray &data)
     {
         QVariantMap streams;
 
         QString streamName;
+
+        qDebug() << "m3u8:\n" << data;
+
         foreach(QString str, QString(data).split("\n")){
 
             if (str.contains("VIDEO=")){

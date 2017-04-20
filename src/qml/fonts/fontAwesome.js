@@ -28,6 +28,7 @@ var icons = {
     "chat":         "\uf086",
     "reload":       "\uf021",
     "minimode":	    "\uf2d2",
-    "smile":        "\uf1e8"
+    "twitch":        "\uf1e8",
+    "film":         "\uf008"
 }
 

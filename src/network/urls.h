@@ -19,6 +19,7 @@
 #define TWITCH_API "https://api.twitch.tv/api"
 #define TWITCH_API_BASE "https://api.twitch.tv/kraken/base"
 //#define TWITCH_EMOTES "http://static-cdn.jtvnw.net/emoticons/v1/"
+#define TWITCH_CLIPS_API "https://clips.twitch.tv/clips"
 #define CLIENT_ID "0dpzlnp1w2bjlim3ldp0u96o4dq2gm"
 
 #endif // URLS_H

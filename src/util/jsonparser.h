@@ -42,6 +42,8 @@ public:
     static Game* parseGame(const QJsonObject&);
     static Channel* parseStream(const QByteArray&);
     static Channel* parseStreamJson(const QJsonObject&);
+    static QString parseClip(const QByteArray&);
+    static QString parseClipJson(const QJsonObject &json);
     static Channel* parseChannel(const QByteArray&);
     static Channel* parseChannelJson(const QJsonObject&);
     static Vod* parseVod(const QJsonObject&);

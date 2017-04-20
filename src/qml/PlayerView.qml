@@ -29,6 +29,7 @@ Item {
     property var streamMap
     property bool isVod: false
     property bool streamOnline: true
+    property var streamTimeInfo: null
 
     property bool cursorHidden: false
     property string currentQualityName
@@ -82,6 +83,7 @@ Item {
 
         onFoundPlaybackStream: {
             loadStreams(streams)
+            streamTimeInfo = timeInfo;
         }
     }
 
@@ -118,6 +120,11 @@ Item {
             default:
                 break;
             }
+        }
+
+        onClipCreated: {
+            console.log("clip created; opening url", url);
+            Qt.openUrlExternally(url);
         }
     }
 
@@ -246,6 +253,21 @@ Item {
     function reloadStream() {
         renderer.stop()
         loadAndPlay()
+    }
+
+    function clipThis() {
+        var rendererPos = renderer.position;
+        if (isVod) {
+            console.log("vod clips not implemented yet")
+            for (var i in vod) {
+                if (vod.hasOwnProperty(i))
+                    console.log("  ", i);
+            }
+        } else {
+            var broadcastId = streamTimeInfo.broadcastId;
+            console.log("create stream clip for broadcastId", broadcastId, "rendererPos", rendererPos);
+            g_cman.createClip(currentChannel.name, broadcastId, "", rendererPos);
+        }
     }
 
     Connections {
@@ -621,6 +643,36 @@ Item {
                     bottom: parent.bottom
                     left: reloadButton.right
                     right: fitButton.left
+                }
+            }
+
+            Icon {
+                id: clipButton
+                icon: "film"
+                anchors {
+                    right: fitButton.left
+                    verticalCenter: parent.verticalCenter
+                }
+                width: g_cman.isAccessTokenAvailable() ? dp(50) : 0
+                height: width
+
+                MouseArea {
+                    id: clipButtonArea
+                    anchors.fill: parent
+                    onClicked: {
+                        clipThis();
+                    }
+
+                    hoverEnabled: true
+                    onHoveredChanged: {
+                        parent.iconColor = containsMouse ? Styles.textColor : Styles.iconColor
+                    }
+
+                    ToolTip {
+                        visible: parent.containsMouse
+                        delay: 666
+                        text: "Clip"
+                    }
                 }
             }
 

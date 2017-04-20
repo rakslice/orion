@@ -18,6 +18,7 @@
 #include "../util/m3u8parser.h"
 #include <QNetworkConfiguration>
 #include <QEventLoop>
+#include <QUrlQuery>
 
 NetworkManager::NetworkManager(QNetworkAccessManager *man)
 {
@@ -433,6 +434,101 @@ void NetworkManager::editUserFavourite(const QString &access_token, const QStrin
     connect(reply, SIGNAL(finished()), this, SLOT(editUserFavouritesReply()));
 }
 
+QByteArray randByteArray(int size) {
+    qsrand(QTime::currentTime().msec());
+    QByteArray out(size, 0);
+    for (int i = 0; i < size; i++)
+        out[i] = qrand() & 0xff;
+    return out;
+}
+
+void NetworkManager::createClip(const QString &access_token, const QString &channelName, const QString &broadcastId, const QString &vodId, quint64 offset) {
+    //https://api.twitch.tv/kraken/streams
+
+    /*
+    POST https://clips.twitch.tv/clips
+    player_backend_type
+    channel
+    offset
+    broadcast_id
+    vod_id
+    play_session_id
+    */
+
+    QString url = QString(TWITCH_CLIPS_API);
+
+    QString auth = "OAuth " + access_token;
+
+    QNetworkRequest request;
+    request.setRawHeader("Client-ID", getClientId().toUtf8());
+    request.setUrl(url);
+    request.setRawHeader(QString("Authorization").toUtf8(), auth.toUtf8());
+    request.setHeader(QNetworkRequest::ContentTypeHeader,
+        "application/x-www-form-urlencoded");
+    //request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+
+    QUrlQuery postData;
+    postData.addQueryItem("player_backend_type", "");
+    postData.addQueryItem("broadcast_id", broadcastId);
+    postData.addQueryItem("vod_id", vodId);
+    postData.addQueryItem("channel", channelName);
+    auto offsetStr = QString::number(offset);
+    postData.addQueryItem("offset", offsetStr);
+
+    QString playSessionId = randByteArray(14).toHex();
+    postData.addQueryItem("play_session_id", playSessionId);
+
+    qDebug() << "POST" << url << "with broadcast_id" << broadcastId << "vod_id" << vodId << "channel" << channelName << "offset" << offsetStr << "play_session_id" << playSessionId;
+
+    QNetworkReply *reply = operation->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    
+    connect(reply, SIGNAL(finished()), this, SLOT(createClipReply()));
+}
+
+
+void NetworkManager::createClipReply() {
+    // https://discuss.dev.twitch.tv/t/clips-occasionally-have-wrong-vod-timestamp/9741
+    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+
+    if (!handleNetworkError(reply)) {
+        return;
+    }
+
+    QVariant code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+    
+    reply->deleteLater();
+
+    if (code >= 300 && code < 400) {
+        // Redirect; do a GET to the redirect location
+        QUrl redirectUrl = reply->header(QNetworkRequest::LocationHeader).toUrl();
+        QString rawRedirectUrl = reply->rawHeader("Location");
+        qDebug() << "location header is" << rawRedirectUrl;
+
+        if (rawRedirectUrl.startsWith('/')) {
+            // just rebuild the URL, the builtin isn't going to give us anything useful
+            redirectUrl = reply->url().resolved(rawRedirectUrl);
+        }
+        qDebug() << code << "redirect to" << redirectUrl;
+        QNetworkRequest redirectRequest = reply->request();
+        redirectRequest.setUrl(redirectUrl);
+        
+        QNetworkReply *redirectReply = operation->get(redirectRequest);
+
+        connect(redirectReply, SIGNAL(finished()), this, SLOT(createClipReply()));
+    }
+    else {
+        QByteArray data = reply->readAll();
+
+        qDebug() << "createClipReply: HTTP" << code;
+        qDebug() << "data:";
+        qDebug() << data;
+
+        QString clipUrl = JsonParser::parseClip(data);
+
+        emit clipCreated(clipUrl);
+    }
+}
+
 QNetworkAccessManager *NetworkManager::getManager() const
 {
     return operation;
@@ -649,7 +745,7 @@ void NetworkManager::m3u8Reply()
 
     switch ((M3U8TYPE) reply->request().attribute(QNetworkRequest::User).toInt()) {
     case LIVE:
-        emit m3u8OperationFinished(m3u8::getUrls(data));
+        emit m3u8OperationFinished(m3u8::getUrls(data), m3u8::getTimeInfo(data));
         break;
 
     case VOD:

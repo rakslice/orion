@@ -117,6 +117,26 @@ Channel* JsonParser::parseStreamJson(const QJsonObject &json)
     return channel;
 }
 
+QString JsonParser::parseClip(const QByteArray &data)
+{
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error == QJsonParseError::NoError) {
+        return parseClipJson(doc.object());
+    }
+    return "";
+}
+
+QString JsonParser::parseClipJson(const QJsonObject &json)
+{
+    if (!json["url"].isNull()) {
+        return json["url"].toString();
+    }
+    else {
+        return "";
+    }
+}
+
 QList<Game*> JsonParser::parseGames(const QByteArray &data)
 {
     QList<Game*> games;

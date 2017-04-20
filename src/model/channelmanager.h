@@ -147,6 +147,8 @@ public:
     Q_INVOKABLE bool loadChannelBadgeUrls(const QString channel);
     Q_INVOKABLE bool loadChannelBetaBadgeUrls(int channel);
 
+    Q_INVOKABLE void createClip(const QString &channelName, const QString &broadcastId, const QString &vodId, quint64 offset);
+
     void setSwapChat(bool value);
     bool getSwapChat();
 
@@ -195,7 +197,7 @@ signals:
     void resultsUpdated();
     void featuredUpdated();
     void searchingStarted();
-    void foundPlaybackStream(const QVariantMap &streams);
+    void foundPlaybackStream(const QVariantMap &streams, const QVariantMap &timeInfo);
     void deletedChannel(const quint32 &chanid);
     void addedChannel(const quint32 &chanid);
     void gamesSearchStarted();

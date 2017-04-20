@@ -336,7 +336,7 @@ Item {
                     bottom: parent.bottom
                 }
 
-                icon: "smile"
+                icon: "twitch"
 
                 Connections {
                     target: _emotePicker

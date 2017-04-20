@@ -117,7 +117,7 @@ ChannelManager::ChannelManager(NetworkManager *netman) : netman(netman), badgeIm
     connect(netman, SIGNAL(gamesOperationFinished(const QList<Game*>&)), this, SLOT(addGames(QList<Game*>)));
     connect(netman, SIGNAL(gameStreamsOperationFinished(const QList<Channel*>&)), this, SLOT(addSearchResults(QList<Channel*>)));
     connect(netman, SIGNAL(searchChannelsOperationFinished(const QList<Channel*>&)), this, SLOT(addSearchResults(QList<Channel*>)));
-    connect(netman, SIGNAL(m3u8OperationFinished(QVariantMap)), this, SIGNAL(foundPlaybackStream(QVariantMap)));
+    connect(netman, SIGNAL(m3u8OperationFinished(QVariantMap, QVariantMap)), this, SIGNAL(foundPlaybackStream(QVariantMap, QVariantMap)));
     connect(netman, SIGNAL(searchGamesOperationFinished(QList<Game*>)), this, SLOT(addGames(QList<Game*>)));
 
     connect(netman, SIGNAL(userNameOperationFinished(QString)), this, SLOT(onUserNameUpdated(QString)));
@@ -162,6 +162,12 @@ int ChannelManager::getAlertPosition() const
 void ChannelManager::setAlertPosition(const int &value)
 {
     alertPosition = value;
+}
+
+void ChannelManager::createClip(const QString &channelName, const QString &broadcastId, const QString &vodId, const quint64 offset) {
+    if (isAccessTokenAvailable() && !user_name.isEmpty()) {
+        netman->createClip(access_token, channelName, broadcastId, vodId, offset);
+    }
 }
 
 void ChannelManager::addToFavourites(const quint32 &id, const QString &serviceName, const QString &title,
