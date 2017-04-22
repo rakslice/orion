@@ -14,10 +14,6 @@
 
 import QtQuick 2.5
 
-import "../util.js" as Util
-
-// Could this not be using CommonGrid?
-
 //ChannelList.qml
 GridView {
     property variant selectedItem
@@ -26,6 +22,7 @@ GridView {
 
     signal itemClicked(int index, Item clickedItem)
     signal itemRightClicked(int index, Item clickedItem)
+    signal itemTooltipHover(int index, real mX, real mY)
 
     id: root
 
@@ -104,7 +101,8 @@ GridView {
 
         Timer {
             id: tooltipTimer
-            interval: 800
+            // this is longer than the 800ms QML press and hold time so that a press and hold will take precedence
+            interval: 900
             running: false
             repeat: false
             onTriggered: {
@@ -118,19 +116,7 @@ GridView {
                     var index = root.indexAt(mX + root.contentX, mY + root.contentY)
 
                     if (mArea.containsMouse && selectedItem){
-
-                        g_tooltip.text = ""
-
-                        g_tooltip.text += "<b>" + selectedItem.title + "</b><br/>";
-
-                        g_tooltip.text += "Playing " + selectedItem.game + "<br/>"
-                        if (selectedItem.duration)
-                            g_tooltip.text += "Duration " + Util.getTime(selectedItem.duration) + "<br/>"
-
-                        g_tooltip.text += selectedItem.views + " views<br/>"
-
-                        g_tooltip.img = selectedItem.preview
-                        g_tooltip.display(g_rootWindow.x + mX, g_rootWindow.y + mY)
+                        root.itemTooltipHover(index, mX, mY);
                     }
                 }
             }
@@ -139,14 +125,28 @@ GridView {
         onClicked: {
             // Note that click/press doesn't necessarily set grid's current item so we shouldn't use currentIndex
             // TODO: rework this if something better than a single-point click solution is available for touchscreens
-            var clickedIndex = indexAt(mouse.x, mouse.y);
+            var clickedIndex = indexAt(mouse.x + root.contentX, mouse.y + root.contentY);
             if (clickedIndex !== -1){
-                var clickedItem = itemAt(mouse.x, mouse.y);
+                var clickedItem = itemAt(mouse.x + root.contentX, mouse.y + root.contentY);
                 if (mouse.button === Qt.LeftButton)
-                    itemClicked(clickedIndex, clickedItem);
+                    itemClicked(clickedIndex, clickedItem)
                 else if (mouse.button === Qt.RightButton){
-                    itemRightClicked(clickedIndex, clickedItem);
+                    itemRightClicked(clickedIndex, clickedItem)
                 }
+            }
+        }
+
+        onPressed: {
+            //console.log("pressed");
+            tooltipTimer.restart();
+        }
+
+        onPressAndHold: {
+            //console.log("pressed and held");
+            var clickedIndex = indexAt(mouse.x + root.contentX, mouse.y + root.contentY);
+            if (clickedIndex !== -1){
+                var clickedItem = itemAt(mouse.x + root.contentX, mouse.y + root.contentY);
+                itemRightClicked(clickedIndex, clickedItem);
             }
         }
     }

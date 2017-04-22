@@ -4,11 +4,11 @@
 #
 #-------------------------------------------------
 
-QT     += gui qml quick network widgets webengine
+QT     += gui qml quick network widgets
 
 TARGET = orion
 
-VERSION = 1.4.3
+VERSION = 1.5.1
 DEFINES += APP_VERSION=\\\"v$$VERSION\\\"
 
 DEFINES += APP_NAME=\\\"Orion\\\"
@@ -30,7 +30,8 @@ SOURCES += src/main.cpp\
     src/model/vodlistmodel.cpp \
     src/model/vodmanager.cpp \
     src/notification/notificationmanager.cpp \
-    src/model/ircchat.cpp
+    src/model/ircchat.cpp \
+    src/model/imageprovider.cpp
 
 
 HEADERS  += src/model/channel.h \
@@ -51,7 +52,9 @@ HEADERS  += src/model/channel.h \
     src/model/vodmanager.h \
     src/network/urls.h \
     src/notification/notificationmanager.h \
-    src/model/ircchat.h
+    src/model/ircchat.h \
+    src/model/imageprovider.h \
+    src/network/httpserver.h
 
 #Backend for player, uses mpv as default
 !qtav: !multimedia {

@@ -20,6 +20,7 @@
 #include "gamelistmodel.h"
 #include "game.h"
 #include "../network/networkmanager.h"
+#include "imageprovider.h"
 
 #include <QSettings>
 #include <QSortFilterProxyModel>
@@ -27,6 +28,22 @@
 #define DEFAULT_LOGO_URL    "http://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_150x150.png"
 
 //class NetworkManager;
+
+class ChannelManager;
+
+class BadgeImageProvider : public ImageProvider {
+public:
+    BadgeImageProvider(ChannelManager * channelManager);
+    void setChannelName(QString channelName) { _channelName = channelName; }
+    void setChannelId(QString channelId) { _channelId = channelId; }
+    virtual QString getCanonicalKey(QString key);
+protected:
+    virtual const QUrl getUrlForKey(QString & key);
+private:
+    ChannelManager * _channelManager;
+    QString _channelName;
+    QString _channelId;
+};
 
 class ChannelManager: public QObject
 {
@@ -78,6 +95,8 @@ protected:
     QMap<QString, QMap<QString, QMap<QString, QString>>> channelBadgeUrls;
     QMap<QString, QMap<QString, QMap<QString, QMap<QString, QString>>>> channelBadgeBetaUrls;
 
+    BadgeImageProvider badgeImageProvider;
+
 public:
     ChannelManager(NetworkManager *netman);
     ~ChannelManager();
@@ -119,7 +138,6 @@ public:
     Q_INVOKABLE QString username() const;
     Q_INVOKABLE QString accessToken() const;
 
-    Q_INVOKABLE void setAccessToken(const QString &arg);
     Q_INVOKABLE bool isAccessTokenAvailable() { return !access_token.isEmpty(); }
 
     Q_INVOKABLE bool isMinimizeOnStartup() const;
@@ -135,6 +153,43 @@ public:
     void setOfflineNotifications(bool value);
     bool getOfflineNotifications();
     
+    BadgeImageProvider * getBadgeImageProvider() {
+        return &badgeImageProvider;
+    }
+
+    bool getChannelBadgeUrl(const QString channel, const QString badgeName, const QString imageFormat, QString & outUrl) {
+        auto channelEntry = channelBadgeUrls.find(channel);
+        if (channelEntry != channelBadgeUrls.end()) {
+            auto badgeEntry = channelEntry.value().find(badgeName);
+            if (badgeEntry != channelEntry.value().end()) {
+                auto urlEntry = badgeEntry.value().find(imageFormat);
+                if (urlEntry != badgeEntry.value().end()) {
+                    outUrl = urlEntry.value();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool getChannelBadgeBetaUrl(const QString channel, const QString badgeName, const QString version, const QString imageFormat, QString & outUrl) {
+        auto channelEntry = channelBadgeBetaUrls.find(channel);
+        if (channelEntry != channelBadgeBetaUrls.end()) {
+            auto badgeEntry = channelEntry.value().find(badgeName);
+            if (badgeEntry != channelEntry.value().end()) {
+                auto versionEntry = badgeEntry.value().find(version);
+                if (versionEntry != badgeEntry.value().end()) {
+                    auto urlEntry = versionEntry.value().find(imageFormat);
+                    if (urlEntry != versionEntry.value().end()) {
+                        outUrl = urlEntry.value();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 signals:
     void pushNotification(const QString &title, const QString &message, const QString &imgUrl);
     void resultsUpdated();
@@ -169,6 +224,7 @@ public slots:
     void getFeatured();
     void findPlaybackStream(const QString&);
     void setAlert(const bool&);
+    void setAccessToken(const QString &arg);
 
 private slots:
     void addSearchResults(const QList<Channel*>&);

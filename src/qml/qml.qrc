@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>components/Channel.qml</file>
-        <file>components/ChannelGrid.qml</file>
         <file>components/Tooltip.qml</file>
         <file>styles.js</file>
         <file>components/PurpleButton.qml</file>
@@ -41,13 +40,10 @@
         <file>VodsView.qml</file>
         <file>components/Video.qml</file>
         <file>components/SeekBar.qml</file>
-        <file>components/VodGrid.qml</file>
         <file>util.js</file>
-        <file>WebView.qml</file>
         <file>components/GradientBottom.qml</file>
         <file>components/BasicButton.qml</file>
         <file>components/OptionEntry.qml</file>
-        <file>WebPlayer.qml</file>
         <file>player.html</file>
         <file>irc/Chat.qml</file>
         <file>irc/ChatView.qml</file>
@@ -56,5 +52,7 @@
         <file>IconButton.qml</file>
         <file>components/GridPicker.qml</file>
         <file>components/CustomFlow.qml</file>
+        <file>components/CommonGrid.qml</file>
+        <file>components/ChannelGrid.qml</file>
     </qresource>
 </RCC>

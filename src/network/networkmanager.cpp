@@ -18,7 +18,6 @@
 #include "../util/m3u8parser.h"
 #include <QNetworkConfiguration>
 #include <QEventLoop>
-#include <QtWebEngine>
 
 NetworkManager::NetworkManager(QNetworkAccessManager *man)
 {
@@ -120,6 +119,10 @@ void NetworkManager::testNetworkInterface()
         operation->setConfiguration(conf.defaultConfiguration());
         offlinePoller.start();
     }
+}
+
+bool NetworkManager::networkAccess() {
+    return connectionOK;
 }
 
 void NetworkManager::testConnection()
@@ -433,10 +436,6 @@ void NetworkManager::editUserFavourite(const QString &access_token, const QStrin
 QNetworkAccessManager *NetworkManager::getManager() const
 {
     return operation;
-}
-
-void NetworkManager::clearCookies() {
-    //QQuickWebEngineProfile::defaultProfile()->cookieStore()->deleteAllCookies();
 }
 
 void NetworkManager::getM3U8Data(const QString &url, M3U8TYPE type)

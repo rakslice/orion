@@ -18,6 +18,7 @@ import QtQuick.Controls.Styles 1.4
 import "../fonts/fontAwesome.js" as FontAwesome
 import "../styles.js" as Styles
 import "../components"
+import "../"
 
 Item {
     id: root
@@ -52,7 +53,7 @@ Item {
     }
 
     function joinChannel(channel, channelId) {
-        if ("#" + channel != chat.channel) {
+        if (channel != chat.channel) {
             chatModel.clear()
             chat.joinChannel(channel, channelId)
         }
@@ -314,7 +315,7 @@ Item {
                 }
             }
 
-            Button{
+            IconButton{
                 id: _emoteButton
                 property bool emotePickerDownloadsInProgress : false
                 property var setsToDownload
@@ -325,7 +326,9 @@ Item {
 
                 property bool pickerLoaded: false
 
-                width: dp(38)
+                visible: root.width > 0
+
+                width: height
 
                 anchors {
                     right: parent.right
@@ -333,24 +336,7 @@ Item {
                     bottom: parent.bottom
                 }
 
-                text: "emotes"
-
-                style: ButtonStyle {
-                    background: Rectangle {
-                        color: "#000000"
-                    }
-
-                    label: Text {
-                        text: FontAwesome.fromText("smile")
-                        color: "#ffffff"
-                        font.family: "FontAwesome"
-                        font.pointSize: 18
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-
-                    }
-                }
+                icon: "smile"
 
                 Connections {
                     target: _emotePicker
@@ -727,6 +713,8 @@ Item {
 
                 var curBadgeAdded = false;
 
+                var badgeLocalUrl = chat.getBadgeLocalUrl(badgeName + "-" + versionStr);
+
                 var badgeSetData = lastBetaBadgeSetData[badgeName];
                 if (badgeSetData != null) {
                     var versionObj = badgeSetData[versionStr];
@@ -734,7 +722,7 @@ Item {
                         console.log("  beta badge set for", badgeName, "has no version entry for", versionStr);
                         console.log("  available versions are", keysStr(badgeSetData))
                     } else {
-                        var entry = {"name": versionObj.title, "url": versionObj.image_url_1x, "click_action": versionObj.click_action, "click_url": versionObj.click_url}
+                        var entry = {"name": versionObj.title, "url": badgeLocalUrl, "click_action": versionObj.click_action, "click_url": versionObj.click_url}
                         console.log("adding entry", JSON.stringify(entry));
                         badgeEntries.push(entry);
                         curBadgeAdded = true;
@@ -747,8 +735,7 @@ Item {
                     for (var j in badgeUrls) {
                         console.log("    key", j, "value", badgeUrls[j]);
                     }
-                    var url = badgeUrls[imageFormatToUse];
-                    var entry = {"name": badgeName, "url": url};
+                    var entry = {"name": badgeName, "url": badgeLocalUrl};
                     console.log("adding entry", JSON.stringify(entry));
                     badgeEntries.push(entry);
                     curBadgeAdded = true;

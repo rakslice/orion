@@ -78,8 +78,8 @@ public:
     QNetworkAccessManager *getManager() const;
 
     //TODO: move to new class if more operations need to be added
-    Q_INVOKABLE void clearCookies();
     Q_INVOKABLE QString getClientId() const { return QString(CLIENT_ID); }
+    Q_INVOKABLE bool networkAccess();
 
 signals:
     void finishedConnectionTest();
