@@ -79,6 +79,8 @@ public:
 
     Q_INVOKABLE void getVodStartTime(quint64 vodId);
     Q_INVOKABLE void getVodChatPiece(quint64 vodId, quint64 offset);
+    Q_INVOKABLE void cancelLastVodChatRequest();
+    Q_INVOKABLE void resetVodChat();
 
     QNetworkAccessManager *getManager() const;
 
@@ -157,6 +159,8 @@ private:
     void initReplayChat();
     void teardownReplayChat();
     void filterReplayChat(QList<ReplayChatMessage> & replayChat);
+
+    QNetworkReply *lastVodChatRequest;
 };
 
 #endif // NETWORKMANAGER_H

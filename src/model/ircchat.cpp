@@ -156,6 +156,10 @@ const double CHAT_CHUNK_TIME = 30.0;
 
 void IrcChat::replaySeek(double newOffset) {
     // we set a flag indicating that a request is in flight
+    if (replayChatRequestInProgress) {
+        _cman->cancelLastVodChatRequest();
+    }
+    _cman->resetVodChat();
     replayChatRequestInProgress = true;
     // we save the offset as the current time
     replayChatCurrentTime = replayChatVodStartTime + newOffset;
@@ -299,6 +303,15 @@ void IrcChat::handleDownloadedReplayChat(QList<ReplayChatMessage> messages) {
     replayChatRequestInProgress = false;
 
     replayUpdateCommon();
+}
+
+void IrcChat::replayStop() {
+    if (replayChatRequestInProgress) {
+        _cman->cancelLastVodChatRequest();
+        replayChatRequestInProgress = false;
+    }
+    _cman->resetVodChat();
+    replayChatMessagesPending.clear();
 }
 
 void IrcChat::leave()
