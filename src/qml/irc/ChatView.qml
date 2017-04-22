@@ -54,7 +54,7 @@ Item {
     }
 
     function joinChannel(channel, channelId) {
-        if (channel != chat.channel) {
+        if (channel !== chat.channel || chat.replayMode) {
             chatModel.clear()
             chat.joinChannel(channel, channelId)
         }
@@ -63,6 +63,20 @@ Item {
     function leaveChannel() {
         chatModel.clear()
         chat.leaveChannel()
+    }
+
+    function replayChat(channelName, channelId, vodId, startEpochTime) {
+        chatModel.clear()
+        chat.leaveChannel()
+        chat.replayChat(channelName, channelId, vodId, startEpochTime);
+    }
+
+    function replaySeek(newOffset) {
+        chat.replaySeek(newOffset);
+    }
+
+    function replayUpdate(newOffset) {
+        chat.replayUpdate(newOffset);
     }
 
     function sendMessage() {
@@ -276,7 +290,7 @@ Item {
             right: parent.right
         }
 
-        visible: !chat.isAnonymous
+        visible: !chat.isAnonymous && !chat.replayMode
 
         Rectangle {
             anchors.fill: parent
