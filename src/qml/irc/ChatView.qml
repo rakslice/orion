@@ -180,6 +180,7 @@ Item {
             emoteDirPath: chat.emoteDirPath
             isChannelNotice: model.isChannelNotice
             systemMessage: model.systemMessage
+            isWhisper: model.isWhisper
             highlightOpacity: root._opacity
 
             anchors {
@@ -775,7 +776,7 @@ Item {
 
             var jsonBadgeEntries = JSON.stringify(badgeEntries);
 
-            chatModel.append({"user": user, "message": serializedMessage, "isAction": isAction, "jsonBadgeEntries": jsonBadgeEntries, "isChannelNotice": isChannelNotice, "systemMessage": systemMessage})
+            chatModel.append({"user": user, "message": serializedMessage, "isAction": isAction, "jsonBadgeEntries": jsonBadgeEntries, "isChannelNotice": isChannelNotice, "systemMessage": systemMessage, "isWhisper": isWhisper})
             list.scrollbuf = 6
         }
 
