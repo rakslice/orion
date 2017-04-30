@@ -80,6 +80,7 @@ protected:
 
     //Oauth
     QString user_name;
+    quint64 user_id;
     QString access_token;
 
     /**
@@ -153,6 +154,7 @@ public:
     Q_INVOKABLE void resetVodChat();
     Q_INVOKABLE void getVodStartTime(quint64 vodId);
     Q_INVOKABLE void getVodChatPiece(quint64 vodId, quint64 offset);
+    Q_INVOKABLE void loadSavedPositions(quint64 userId);
 
     void setSwapChat(bool value);
     bool getSwapChat();
@@ -213,7 +215,7 @@ signals:
 
     //oauth methods
     void accessTokenUpdated();
-    void userNameUpdated(const QString name);
+    void userNameUpdated(const QString name, const quint64 user_id);
     void login(const QString &username, const QString &password);
     void emoteSetsLoaded(QVariantMap emoteSets);
     void channelBadgeUrlsLoaded(const QString &channel, QVariantMap badgeUrls);
@@ -223,6 +225,7 @@ signals:
     void vodChatPieceGetOperationFinished(QList<ReplayChatMessage>);
 
     void chatterListLoaded(QVariantMap chatters);
+    void savedPositionsLoadFinished(QVariantMap positions);
 
 public slots:
     void checkFavourites();
@@ -244,7 +247,7 @@ private slots:
     void updateFavourites(const QList<Channel*>&);
     void updateStreams(const QList<Channel*>&);
     void addGames(const QList<Game*>&);
-    void onUserNameUpdated(const QString &name);
+    void onUserNameUpdated(const QString &name, const quint64 id);
     void onEmoteSetsUpdated(const QMap<int, QMap<int, QString>>);
     void innerChannelBadgeUrlsLoaded(const QString, const QMap<QString, QMap<QString, QString>> badgeUrls);
     void innerChannelBadgeBetaUrlsLoaded(const int channelId, const QMap<QString, QMap<QString, QMap<QString, QString>>> badgeData);

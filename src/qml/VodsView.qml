@@ -42,6 +42,7 @@ Item{
         header.text = "Videos for " + selectedChannel.title;
 
         g_vodmgr.search(selectedChannel.name, 0, 35)
+        g_cman.loadSavedPositions(vods.userId);
 
         itemCount = 35
 
@@ -123,6 +124,16 @@ Item{
         }
 
         onAtYEndChanged: checkScroll()
+
+        property var userId;
+
+        Connections {
+            target: g_cman
+            onUserNameUpdated: {
+                vods.userId = user_id;
+                console.log("VodsView numerical user id", vods.userId);
+            }
+        }
 
         function checkScroll(){
             if (atYEnd && model.count() === itemCount && itemCount > 0){

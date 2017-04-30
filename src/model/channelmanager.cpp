@@ -120,7 +120,7 @@ ChannelManager::ChannelManager(NetworkManager *netman) : netman(netman), badgeIm
     connect(netman, SIGNAL(m3u8OperationFinished(QVariantMap)), this, SIGNAL(foundPlaybackStream(QVariantMap)));
     connect(netman, SIGNAL(searchGamesOperationFinished(QList<Game*>)), this, SLOT(addGames(QList<Game*>)));
 
-    connect(netman, SIGNAL(userNameOperationFinished(QString)), this, SLOT(onUserNameUpdated(QString)));
+    connect(netman, SIGNAL(userNameOperationFinished(QString, quint64)), this, SLOT(onUserNameUpdated(QString, quint64)));
     connect(netman, SIGNAL(getEmoteSetsOperationFinished(const QMap<int, QMap<int, QString>>)), this, SLOT(onEmoteSetsUpdated(const QMap<int, QMap<int, QString>>)));
     connect(netman, SIGNAL(getChannelBadgeUrlsOperationFinished(const QString, const QMap<QString, QMap<QString, QString>>)), this, SLOT(innerChannelBadgeUrlsLoaded(const QString, const QMap<QString, QMap<QString, QString>>)));
     connect(netman, SIGNAL(getChannelBadgeBetaUrlsOperationFinished(const int, const QMap<QString, QMap<QString, QMap<QString, QString>>>)), this, SLOT(innerChannelBadgeBetaUrlsLoaded(const int, const QMap<QString, QMap<QString, QMap<QString, QString>>>)));
@@ -129,6 +129,7 @@ ChannelManager::ChannelManager(NetworkManager *netman) : netman(netman), badgeIm
     connect(netman, SIGNAL(vodStartGetOperationFinished(double)), this, SIGNAL(vodStartGetOperationFinished(double)));
     connect(netman, SIGNAL(vodChatPieceGetOperationFinished(QList<ReplayChatMessage>)), this, SIGNAL(vodChatPieceGetOperationFinished(QList<ReplayChatMessage>)));
     connect(netman, SIGNAL(chatterListLoadOperationFinished(QMap<QString, QList<QString>>)), this, SLOT(processChatterList(QMap<QString, QList<QString>>)));
+    connect(netman, SIGNAL(savedPositionsLoadFinished(QVariantMap)), this, SIGNAL(savedPositionsLoadFinished(QVariantMap)));
 
     connect(netman, SIGNAL(networkAccessChanged(bool)), this, SLOT(onNetworkAccessChanged(bool)));
     load();
@@ -623,10 +624,11 @@ void ChannelManager::notifyMultipleChannelsOnline(const QList<Channel*> &channel
 
 
 //Login function
-void ChannelManager::onUserNameUpdated(const QString &name)
+void ChannelManager::onUserNameUpdated(const QString &name, const quint64 id)
 {
     user_name = name;
-    emit userNameUpdated(user_name);
+    user_id = id;
+    emit userNameUpdated(user_name, user_id);
 
     if (isAccessTokenAvailable()) {
         emit login(user_name, access_token);
@@ -878,4 +880,10 @@ void ChannelManager::setOfflineNotifications(bool value) {
 
 bool ChannelManager::getOfflineNotifications() {
     return offlineNotifications;
+}
+
+void ChannelManager::loadSavedPositions(quint64 userId) {
+    if (isAccessTokenAvailable()) {
+        netman->loadSavedPositions(userId, access_token);
+    }
 }

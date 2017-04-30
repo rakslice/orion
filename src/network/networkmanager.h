@@ -82,6 +82,7 @@ public:
     Q_INVOKABLE void cancelLastVodChatRequest();
     Q_INVOKABLE void resetVodChat();
     Q_INVOKABLE void loadChatterList(const QString channel);
+    Q_INVOKABLE void loadSavedPositions(quint64 userId, const QString &);
 
     QNetworkAccessManager *getManager() const;
 
@@ -107,7 +108,7 @@ signals:
     void error(const QString &error);
 
     //oauth
-    void userNameOperationFinished(const QString&);
+    void userNameOperationFinished(const QString&, const quint64);
     void userEditFollowsOperationFinished();
     void getEmoteSetsOperationFinished(const QMap<int, QMap<int, QString>>);
     void getChannelBadgeUrlsOperationFinished(const QString, const QMap<QString, QMap<QString, QString>>);
@@ -119,6 +120,7 @@ signals:
     void chatterListLoadOperationFinished(QMap<QString, QList<QString>>);
 
     void networkAccessChanged(bool up);
+    void savedPositionsLoadFinished(QVariantMap out);
 
 private slots:
     void testNetworkInterface();
@@ -140,6 +142,7 @@ private slots:
     void vodStartReply();
     void vodChatPieceReply();
     void chatterListReply();
+    void loadSavedPositionsReply();
 
     //Oauth slots
     void userReply();

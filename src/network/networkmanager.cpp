@@ -293,6 +293,44 @@ void NetworkManager::getBroadcasts(const QString channelName, quint32 offset, qu
     connect(reply, SIGNAL(finished()), this, SLOT(broadcastsReply()));
 }
 
+void NetworkManager::loadSavedPositions(quint64 userId, const QString &access_token)
+{
+    QString url = QString(TWITCH_API) + "/resumewatching/user?id=" + QString::number(userId);
+
+    QString auth = "OAuth " + access_token;
+
+    qDebug() << "Requesting" << url;
+
+    QNetworkRequest request;
+    request.setRawHeader("Client-ID", getClientId().toUtf8());
+    request.setUrl(QUrl(url));
+    //request.setRawHeader(QString("Authorization").toUtf8(), auth.toUtf8());
+    request.setRawHeader(QString("twitch-api-token").toUtf8(), access_token.toUtf8());
+    request.setRawHeader(QString("accept").toUtf8(), QString("application/vnd.twitchtv.v4+json").toUtf8());
+
+    QNetworkReply *reply = operation->get(request);
+
+    connect(reply, SIGNAL(finished()), this, SLOT(loadSavedPositionsReply()));
+}
+
+void NetworkManager::loadSavedPositionsReply()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+
+    if (!handleNetworkError(reply)) {
+        return;
+    }
+
+    QByteArray data = reply->readAll();
+    //qDebug() << data;
+
+    QVariantMap out = JsonParser::parseSavedPositions(data);
+
+    emit savedPositionsLoadFinished(out);
+
+    reply->deleteLater();
+}
+
 void NetworkManager::getBroadcastPlaybackStream(const QString &vod)
 {
     QString url = QString(TWITCH_API)
@@ -902,7 +940,8 @@ void NetworkManager::userReply()
     }
     QByteArray data = reply->readAll();
 
-    emit userNameOperationFinished(JsonParser::parseUserName(data));
+    QPair<QString, quint64> userNameAndId = JsonParser::parseUserNameAndId(data);
+    emit userNameOperationFinished(userNameAndId.first, userNameAndId.second);
 
     reply->deleteLater();
 }

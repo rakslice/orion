@@ -318,6 +318,10 @@ QList<Vod *> JsonParser::parseVods(const QByteArray &data)
     QList<Vod *> vods;
 
     QJsonParseError error;
+
+    qDebug() << "videos returned:";
+    qDebug() << data;
+
     QJsonDocument doc = QJsonDocument::fromJson(data,&error);
     if (error.error == QJsonParseError::NoError){
         QJsonObject json = doc.object();
@@ -402,19 +406,25 @@ QString JsonParser::parseVodExtractionInfo(const QByteArray &data)
     return url;
 }
 
-QString JsonParser::parseUserName(const QByteArray &data)
+QPair<QString, quint64> JsonParser::parseUserNameAndId(const QByteArray &data)
 {
     QString displayName;
+    quint64 id = 0;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data,&error);
+
+    qDebug() << "username data:";
+    qDebug() << data;
 
     if (error.error == QJsonParseError::NoError){
         QJsonObject json = doc.object();
         if (!json["name"].isNull())
             displayName = json["name"].toString();
+        if (!json["_id"].isNull())
+            id = static_cast<quint64>(json["_id"].toDouble());
     }
 
-    return displayName;
+    return qMakePair(displayName, id);
 }
 
 QMap<int, QMap<int, QString>> JsonParser::parseEmoteSets(const QByteArray &data) {
@@ -635,4 +645,38 @@ QMap<QString, QList<QString>> JsonParser::parseChatterList(const QByteArray &dat
 
     return out;
     
+}
+
+QVariantMap JsonParser::parseSavedPositions(const QByteArray& data)
+{
+    QVariantMap out;
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error == QJsonParseError::NoError) {
+        QJsonObject json = doc.object();
+
+        const QJsonArray & videos = json["videos"].toArray();
+
+        for (const auto & videoEntry : videos) {
+            const QJsonObject & videoObject = videoEntry.toObject();
+
+            const QString videoId = videoObject["video_id"].toString();
+            if (videoId == "") {
+                continue;
+            }
+            const QString type = videoObject["type"].toString();
+            const double position = videoObject["position"].toDouble();
+            const QString channelUserId = videoObject["channel_user_id"].toString();
+
+            QVariantMap videoMap;
+            videoMap.insert("position", position);
+            videoMap.insert("type", type);
+            videoMap.insert("channelUserId", channelUserId);
+
+            out.insert(videoId, videoMap);
+        }
+    }
+    return out;
 }
