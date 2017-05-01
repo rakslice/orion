@@ -15,6 +15,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.0
 import "../fonts/fontAwesome.js" as FontAwesome
 import "../styles.js" as Styles
 import "../components"
@@ -152,17 +153,66 @@ Item {
         }
     }
 
+
+    Item {
+        id: chatControls
+        anchors {
+            top: parent.top
+            right: parent.right
+            left: parent.left
+        }
+        height: dp(40)
+
+        IconButton {
+            id: _viewerListButton
+            icon: viewerListEnabled ? "times" : "list"
+
+            enabled: (!isVod && currentChannel && currentChannel.name) ? true : false
+
+            anchors {
+                top: parent.top
+                right: parent.right
+                rightMargin: 5
+                bottom: parent.bottom
+            }
+            width: height
+
+            onClicked: {
+                viewerListEnabled = !viewerListEnabled
+                if (viewerListEnabled && (status == 0)) {
+                    status++;
+                }
+            }
+
+            ToolTip {
+                visible: _viewerListButton.mouseArea.containsMouse
+                delay: 666
+                text: "Viewer List"
+            }
+        }
+    }
+
+	Item {
+		id: chatContainer
+
+		anchors {
+            top: chatControls.bottom
+			left: parent.left
+			right: parent.right
+            bottom: parent.bottom
+		}
+
     Rectangle {
         id: viewerList
         enabled: viewerListEnabled
         property bool loading: true
 
-        height: enabled? root.height : 0
+        height: enabled? parent.height : 0
 
         anchors {
-            bottom: root.bottom
-            left: root.left
-            right: root.right
+            bottom: parent.bottom
+            left: parent.left
+            right: parent.right
         }
 
         Behavior on height {
@@ -192,35 +242,16 @@ Item {
             visible: viewerList.loading && viewerList.enabled
         }
 
-        IconButton {
-            icon: "times"
-
-            visible: viewerList.enabled
-
-            width: height
-
-            anchors {
-                left: viewerListHeading.left
-                top: viewerListHeading.top
-                bottom: viewerListHeading.bottom
-
-            }
-
-            onClicked: {
-                viewerListEnabled = false;
-            }
-        }
-
         Item {
             id: viewerListHeading
             visible: viewerList.enabled
             anchors {
-                top: parent.top
+                bottom: parent.top
                 left: parent.left
                 right: parent.right
             }
 
-            height: dp(60)
+            height: dp(40)
 
             Label {
                 anchors.centerIn: parent
@@ -998,4 +1029,5 @@ Item {
             chatModel.clear()
         }
     }
+}
 }

@@ -817,53 +817,13 @@ Item {
         }
     }
 
-
-    Item {
-        id: chatControls
-        anchors {
-            top: parent.top
-            right: chatview.right
-        }
-        width: chatview.width
-        height: dp(30)
-        visible: chatview.visible && !smallMode
-
-        IconButton {
-            id: _viewerListButton
-            icon: "list"
-
-            enabled: (!isVod && currentChannel && currentChannel.name) ? true : false
-
-            anchors {
-                top: parent.top
-                right: parent.right
-                rightMargin: 5
-                bottom: parent.bottom
-            }
-            width: height
-
-            onClicked: {
-                chatview.viewerListEnabled = !chatview.viewerListEnabled
-                if (chatview.viewerListEnabled && (chatview.status == 0)) {
-                    chatview.status++;
-                }
-            }
-
-            ToolTip {
-                visible: _viewerListButton.mouseArea.containsMouse
-                delay: 666
-                text: "Viewer List"
-            }
-        }
-    }
-
     ChatView {
         id: chatview
 
         // Use JS so we can control the order the anchors are set.
         // https://doc.qt.io/qt-5/qtquick-positioning-anchors.html#changing-anchors
         anchors {
-            top: chatControls.bottom
+            top: parent.top
             bottom: parent.bottom
         }
 
