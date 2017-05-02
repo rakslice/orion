@@ -761,12 +761,7 @@ Item {
                             }
                             curDownloading ++;
                             console.log("Downloading emote set #", curDownloading, curSetID);
-                            var waitForDownload = chat.bulkDownloadEmotes(curSetList);
-
-                            if (!waitForDownload) {
-                                showLastSet();
-                                nextDownload();
-                            }
+                            chat.bulkDownloadEmotes(curSetList);
                         } else {
                             emotePickerDownloadsInProgress = false;
                             _emotePicker.loading = false;
@@ -789,7 +784,7 @@ Item {
 
                 Connections {
                     target: chat
-                    onDownloadComplete: {
+                    onBulkDownloadComplete: {
                         //console.log("outer download complete");
                         if (_emoteButton.emotePickerDownloadsInProgress) {
                             //console.log("handling emote picker set finished");
