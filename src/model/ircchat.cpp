@@ -33,8 +33,8 @@
 #include <QDateTime>
 
 const QString IrcChat::IMAGE_PROVIDER_EMOTE = "emote";
-const QString IrcChat::IMAGE_PROVIDER_BITS = "bits";
 const QString IrcChat::EMOTICONS_URL_FORMAT = "https://static-cdn.jtvnw.net/emoticons/v1/%1/2.0";
+const QString IrcChat::IMAGE_PROVIDER_BITS = "bits";
 
 const qint16 IrcChat::PORT = 6667;
 const QString IrcChat::HOST = "irc.twitch.tv";
