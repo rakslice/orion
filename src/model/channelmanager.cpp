@@ -74,17 +74,18 @@ const QUrl BadgeImageProvider::getUrlForKey(QString & key) {
     return QUrl();
 }
 
-BitsImageProvider::BitsImageProvider(ChannelManager * channelManager) : ImageProvider("bits", ".png"), _channelManager(channelManager) {
+BitsImageProvider::BitsImageProvider(ChannelManager * channelManager) : ImageProvider("bits", ".gif"), _channelManager(channelManager) {
 
 }
 
 QString BitsImageProvider::getCanonicalKey(QString key) {
     // input key has a prefix and a bits level, separated by a -
 
-    QString url;
+    QString globalUrl;
+    QString channelUrl;
     
     const QString theme = "dark";
-    const QString type = "static";
+    const QString type = "animated";
     const QString size = "2";
 
     int splitPos = key.indexOf('-');
@@ -92,18 +93,22 @@ QString BitsImageProvider::getCanonicalKey(QString key) {
         QString prefix = key.left(splitPos);
         QString minBits = key.mid(splitPos + 1);
 
-        if (_channelManager->getChannelBitsUrl(_channelId, prefix, minBits, url)) {
-            return QList<QString>({QString::number(_channelId), theme, type, size, prefix, minBits}).join("-");
+        bool foundGlobalUrl = _channelManager->getChannelBitsUrl(-1, prefix, minBits, globalUrl);
+
+        if (_channelManager->getChannelBitsUrl(_channelId, prefix, minBits, channelUrl)) {
+            if (!foundGlobalUrl || channelUrl != globalUrl) {
+                return QList<QString>({ QString::number(_channelId), theme, type, size, prefix, minBits }).join("-");
+            }
         }
-        if (_channelManager->getChannelBitsUrl(-1, prefix, minBits, url)) {
+        if (foundGlobalUrl) {
             return QList<QString>({ "GLOBAL", theme, type, size, prefix, minBits }).join("-");
         }
     }
+    qDebug() << "can't canonicalize" << key << "couldn't find that bits badge";
     return key;
 }
 
-
-const QUrl BitsImageProvider::getUrlForKey(QString & key) {
+const QUrl ChannelManager::getBitsUrlForKey(const QString & key) const {
     QString url;
 
     QList<QString> parts = key.split("-");
@@ -113,12 +118,16 @@ const QUrl BitsImageProvider::getUrlForKey(QString & key) {
         const QString & minBits = parts[5];
         const int channelId = channelIdStr == "GLOBAL" ? -1 : channelIdStr.toInt();
 
-        if (_channelManager->getChannelBitsUrl(channelId, prefix, minBits, url)) {
+        if (getChannelBitsUrl(channelId, prefix, minBits, url)) {
             return url;
         }
     }
     qDebug() << "Invalid bits cache key" << key;
     return QUrl();
+}
+
+const QUrl BitsImageProvider::getUrlForKey(QString & key) {
+    return _channelManager->getBitsUrlForKey(key);
 }
 
 
