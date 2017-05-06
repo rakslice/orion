@@ -34,6 +34,8 @@
 #include "model/ircchat.h"
 #include "network/httpserver.h"
 #include <QFont>
+#include <QDesktopWidget>
+#include "main.h"
 
 #ifdef MPV_PLAYER
 #include "player/mpvrenderer.h"
@@ -42,6 +44,34 @@
 inline void noisyFailureMsgHandler(QtMsgType /*type*/, const QMessageLogContext &/*context*/, const QString &/*msg*/)
 {
 
+}
+
+void ScreenChangeHandler::screenChanged(QScreen * screen) {
+
+    qreal dpiMultiplier = screen->logicalDotsPerInch();
+    qDebug() << "screen changed; new logical dpi" << dpiMultiplier;
+    
+    qreal devicePixelRatio = screen->devicePixelRatio();
+    qDebug() << "device pixel ratio" << devicePixelRatio;
+    dpiMultiplier *= devicePixelRatio;
+
+#ifdef Q_OS_WIN
+    dpiMultiplier /= 96;
+
+#elif defined(Q_OS_LINUX)
+    dpiMultiplier /= 96;
+
+#elif defined(Q_OS_MAC)
+    dpiMultiplier /= 72;
+
+#endif
+
+    //Small adjustment to sizing overall
+    dpiMultiplier *= .8;
+
+    qDebug() << "setting new dpiMultiplier" << dpiMultiplier;
+
+    _rootContext->setContextProperty("dpiMultiplier", dpiMultiplier);
 }
 
 int main(int argc, char *argv[])
@@ -94,27 +124,25 @@ int main(int argc, char *argv[])
     QObject::connect(httpserver, SIGNAL(codeReceived(QString)), cman, SLOT(setAccessToken(QString)));
     //-------------------------------------------------------------------------------------------------------------------//
 
-    qreal dpiMultiplier = QGuiApplication::primaryScreen()->logicalDotsPerInch();
-
-#ifdef Q_OS_WIN
-    dpiMultiplier /= 96;
-
-#elif defined(Q_OS_LINUX)
-    dpiMultiplier /= 96;
-
-#elif defined(Q_OS_MAC)
-    dpiMultiplier /= 72;
-
-#endif
-
-    //Small adjustment to sizing overall
-    dpiMultiplier *= .8;
-
-    qDebug() << "Pixel ratio " << QGuiApplication::primaryScreen()->devicePixelRatio();
-    qDebug() <<"DPI mult: "<< dpiMultiplier;
-
     QQmlContext *rootContext = engine.rootContext();
-    rootContext->setContextProperty("dpiMultiplier", dpiMultiplier);
+
+    ScreenChangeHandler screenChangeHandler(rootContext);
+
+    qreal screens = 0;
+    qreal totalDevicePixelRatio = 0;
+
+    qDebug() << "Screens:";
+    for (const auto & screen : QGuiApplication::screens()) {
+        qreal curPixelRatio = screen->devicePixelRatio();
+        totalDevicePixelRatio += curPixelRatio;
+        screens++;
+        qDebug() << "  Screen #" << screens << screen->name() << ": devicePixelRatio" << curPixelRatio;
+    }
+    qreal pixelRatio = screens? (totalDevicePixelRatio / screens) : QGuiApplication::primaryScreen()->devicePixelRatio();
+    qDebug() << "Pixel ratio " << pixelRatio;
+    //qDebug() <<"DPI mult: "<< dpiMultiplier;
+
+    //rootContext->setContextProperty("dpiMultiplier", dpiMultiplier);
     rootContext->setContextProperty("netman", netman);
     rootContext->setContextProperty("g_cman", cman);
     rootContext->setContextProperty("g_guard", &guard);
@@ -144,6 +172,50 @@ int main(int argc, char *argv[])
 
     engine.load(QUrl("qrc:/main.qml"));
 
+    qDebug() << "getting current screen info";
+
+    QWindow * window = nullptr;
+
+    auto rootObjects = engine.rootObjects();
+    if (rootObjects.length() > 0) {
+        QObject * qmlApplicationWindow = rootObjects.first();
+        if (qmlApplicationWindow != nullptr) {
+            qDebug() << "root object is a" << qmlApplicationWindow->metaObject()->className();
+
+            window = dynamic_cast<QWindow *>(qmlApplicationWindow);
+            if (window) {
+                // future screen updates
+                QObject::connect(window, &QWindow::screenChanged, &screenChangeHandler, &ScreenChangeHandler::screenChanged);
+
+                // current screen update
+                QDesktopWidget * desktop = QApplication::desktop();
+                if (desktop != nullptr) {
+                    int screenNumber = desktop->screenNumber(dynamic_cast<QWidget *>(window));
+                    const auto screens = QApplication::screens();
+                    if (screenNumber >= 0 && screenNumber < screens.length()) {
+                        QScreen * screen = screens[screenNumber];
+                        screenChangeHandler.screenChanged(screen);
+                    }
+                    else {
+                        qDebug() << "QDesktopWidget reported window screen number" << screenNumber << "but there is no screen by that number";
+                    }
+                }
+                else {
+                    qDebug() << "can't get desktop widget";
+                }
+            }
+            else {
+                qDebug() << "couldn't cast to QWindow";
+            }
+        }
+        else {
+            qDebug() << "can't get root object - null ptr";
+        }
+    }
+    else {
+        qDebug() << "can't get root object - empty rootobjects list";
+    }
+
     //Set up notifications
     NotificationManager *notificationManager = new NotificationManager(&engine, engine.networkAccessManager());
     QObject::connect(cman, SIGNAL(pushNotification(QString,QString,QString)), notificationManager, SLOT(pushNotification(QString,QString,QString)));
@@ -161,6 +233,10 @@ int main(int argc, char *argv[])
     delete netman;
     delete cman;
     delete notificationManager;
+
+    if (window) {
+        QObject::disconnect(window, &QWindow::screenChanged, &screenChangeHandler, &ScreenChangeHandler::screenChanged);
+    }
 
     qDebug() << "Closing application...";
     return 0;

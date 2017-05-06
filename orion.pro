@@ -54,7 +54,8 @@ HEADERS  += src/model/channel.h \
     src/notification/notificationmanager.h \
     src/model/ircchat.h \
     src/model/imageprovider.h \
-    src/network/httpserver.h
+    src/network/httpserver.h \
+    src/main.h
 
 #Backend for player, uses mpv as default
 !qtav: !multimedia {
