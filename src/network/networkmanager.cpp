@@ -304,9 +304,10 @@ void NetworkManager::loadSavedPositions(quint64 userId, const QString &access_to
     QNetworkRequest request;
     request.setRawHeader("Client-ID", getClientId().toUtf8());
     request.setUrl(QUrl(url));
-    //request.setRawHeader(QString("Authorization").toUtf8(), auth.toUtf8());
-    request.setRawHeader(QString("twitch-api-token").toUtf8(), access_token.toUtf8());
-    request.setRawHeader(QString("accept").toUtf8(), QString("application/vnd.twitchtv.v4+json").toUtf8());
+    request.setRawHeader(QString("Authorization").toUtf8(), auth.toUtf8());
+    //request.setRawHeader(QString("twitch-api-token").toUtf8(), access_token.toUtf8());
+    //request.setRawHeader(QString("Accept").toUtf8(), QString("application/vnd.twitchtv.v4+json").toUtf8());
+    request.setRawHeader(QString("Accept").toUtf8(), QString("application/vnd.twitchtv.v3+json").toUtf8());
 
     QNetworkReply *reply = operation->get(request);
 
