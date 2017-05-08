@@ -39,6 +39,9 @@
 #define USE_HLS true
 #define FOLLOWED_FETCH_LIMIT 25
 
+// Map of action prefix -> bits number str -> url
+typedef QMap<QString, QMap<QString, QString>> BitsQStringsMap;
+
 class NetworkManager: public QObject
 {
     Q_OBJECT
@@ -76,6 +79,8 @@ public:
     void getChannelBadgeUrls(const QString &access_token, const QString &channel);
     void getChannelBadgeUrlsBeta(const int channelID);
     void getGlobalBadgesUrlsBeta();
+    void getChannelBitsUrls(const int channelID);
+    void getGlobalBitsUrls();
 
     Q_INVOKABLE void getVodStartTime(quint64 vodId);
     Q_INVOKABLE void getVodChatPiece(quint64 vodId, quint64 offset);
@@ -119,6 +124,9 @@ signals:
     void vodChatPieceGetOperationFinished(QList<ReplayChatMessage>);
     void chatterListLoadOperationFinished(QMap<QString, QList<QString>>);
 
+    void getChannelBitsUrlsOperationFinished(int channelID, BitsQStringsMap channelBitsUrls, BitsQStringsMap channelBitsColors);
+    void getGlobalBitsUrlsOperationFinished(BitsQStringsMap globalBitsUrls, BitsQStringsMap globalBitsColors);
+
     void networkAccessChanged(bool up);
     void savedPositionsLoadFinished(QVariantMap out);
 
@@ -150,6 +158,8 @@ private slots:
     void channelBadgeUrlsReply();
     void channelBadgeUrlsBetaReply();
     void globalBadgeUrlsBetaReply();
+    void channelBitsUrlsReply();
+    void globalBitsUrlsReply();
 
 private:
     static const QString CHANNEL_BADGES_URL_PREFIX;

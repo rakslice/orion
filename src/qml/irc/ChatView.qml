@@ -15,9 +15,11 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.0
 import "../fonts/fontAwesome.js" as FontAwesome
 import "../styles.js" as Styles
 import "../components"
+import "../util.js" as Util
 import "../"
 
 Item {
@@ -32,6 +34,8 @@ Item {
         if (status > 2)
             status = 0
     }
+
+    property bool chatViewVisible: root.width > 0
 
     visible: status > 0
 
@@ -149,17 +153,66 @@ Item {
         }
     }
 
+
+    Item {
+        id: chatControls
+        anchors {
+            top: parent.top
+            right: parent.right
+            left: parent.left
+        }
+        height: dp(40)
+
+        IconButton {
+            id: _viewerListButton
+            icon: viewerListEnabled ? "times" : "list"
+
+            enabled: (!isVod && currentChannel && currentChannel.name) ? true : false
+
+            anchors {
+                top: parent.top
+                right: parent.right
+                rightMargin: 5
+                bottom: parent.bottom
+            }
+            width: height
+
+            onClicked: {
+                viewerListEnabled = !viewerListEnabled
+                if (viewerListEnabled && (status == 0)) {
+                    status++;
+                }
+            }
+
+            ToolTip {
+                visible: _viewerListButton.mouseArea.containsMouse
+                delay: 666
+                text: "Viewer List"
+            }
+        }
+    }
+
+	Item {
+		id: chatContainer
+
+		anchors {
+            top: chatControls.bottom
+			left: parent.left
+			right: parent.right
+            bottom: parent.bottom
+		}
+
     Rectangle {
         id: viewerList
         enabled: viewerListEnabled
         property bool loading: true
 
-        height: enabled? root.height : 0
+        height: enabled? parent.height : 0
 
         anchors {
-            bottom: root.bottom
-            left: root.left
-            right: root.right
+            bottom: parent.bottom
+            left: parent.left
+            right: parent.right
         }
 
         Behavior on height {
@@ -189,35 +242,16 @@ Item {
             visible: viewerList.loading && viewerList.enabled
         }
 
-        IconButton {
-            icon: "times"
-
-            visible: viewerList.enabled
-
-            width: height
-
-            anchors {
-                left: viewerListHeading.left
-                top: viewerListHeading.top
-                bottom: viewerListHeading.bottom
-
-            }
-
-            onClicked: {
-                viewerListEnabled = false;
-            }
-        }
-
         Item {
             id: viewerListHeading
             visible: viewerList.enabled
             anchors {
-                top: parent.top
+                bottom: parent.top
                 left: parent.left
                 right: parent.right
             }
 
-            height: dp(60)
+            height: dp(40)
 
             Label {
                 anchors.centerIn: parent
@@ -309,7 +343,7 @@ Item {
     ListView {
         id: list
 
-        visible: !viewerList.enabled
+        visible: !viewerList.enabled && root.chatViewVisible
 
         property bool lock: true
         property int scrollbuf: 0
@@ -389,6 +423,8 @@ Item {
 
         visible: false
         height: 0
+
+        devicePixelRatio: chat.getHiDpi()? 2.0 : 1.0
 
         onVisibleChanged: {
             if (visible) {
@@ -508,7 +544,7 @@ Item {
 
                 property bool pickerLoaded: false
 
-                visible: root.width > 0
+                visible: root.chatViewVisible
 
                 width: height
 
@@ -725,12 +761,7 @@ Item {
                             }
                             curDownloading ++;
                             console.log("Downloading emote set #", curDownloading, curSetID);
-                            var waitForDownload = chat.bulkDownloadEmotes(curSetList);
-
-                            if (!waitForDownload) {
-                                showLastSet();
-                                nextDownload();
-                            }
+                            chat.bulkDownloadEmotes(curSetList);
                         } else {
                             emotePickerDownloadsInProgress = false;
                             _emotePicker.loading = false;
@@ -753,7 +784,7 @@ Item {
 
                 Connections {
                     target: chat
-                    onDownloadComplete: {
+                    onBulkDownloadComplete: {
                         //console.log("outer download complete");
                         if (_emoteButton.emotePickerDownloadsInProgress) {
                             //console.log("handling emote picker set finished");
@@ -784,6 +815,8 @@ Item {
         property var globalBetaBadgeSetData: {}
         property var lastBetaBadgeSetData: {}
 
+        property bool debugOutput: false
+
         onLastEmoteSetsChanged: {
             initEmotesMaps();
         }
@@ -801,9 +834,8 @@ Item {
             for (var i in emoteSets) {
                 //console.log("  ", i);
                 var entry = emoteSets[i];
-                for (var emoteIdStr in entry) {
-                    var emoteId = parseInt(emoteIdStr);
-                    var emoteText = entry[emoteIdStr];
+                for (var emoteId in entry) {
+                    var emoteText = entry[emoteId];
                     if (regexExactMatch(plainText, emoteText)) {
                         //console.log("adding plain text emote", emoteText, emoteId);
                         _textEmotesMap[emoteText] = emoteId;
@@ -863,7 +895,7 @@ Item {
         }
 
         onMessageReceived: {
-            //console.log("ChatView chat override onMessageReceived; typeof message " + typeof(message) + " toString: " + message.toString())
+            if (debugOutput) console.log("ChatView chat override onMessageReceived; typeof message " + typeof(message) + " toString: " + message.toString());
 
             if (chatColor != "") {
                 colors[user] = chatColor;
@@ -875,17 +907,17 @@ Item {
 
             // ListElement doesn't support putting in an array value, ugh.
             var serializedMessage = JSON.stringify(message);
-            console.log("onMessageReceived: passing: " + serializedMessage);
+            if (debugOutput) console.log("onMessageReceived: passing: " + serializedMessage);
 
             var badgeEntries = [];
             var imageFormatToUse = "image";
             var badgesSeen = {};
 
-            console.log("badges for this message:")
+            if (debugOutput) console.log("badges for this message:")
             for (var k = 0; k < badges.length; k++) {
                 var badgeName = badges[k][0];
                 var versionStr = badges[k][1];
-                console.log("  badge", badgeName, versionStr);
+                if (debugOutput) console.log("  badge", badgeName, versionStr);
 
                 if (badgesSeen[badgeName]) {
                     continue;
@@ -904,8 +936,15 @@ Item {
                         console.log("  beta badge set for", badgeName, "has no version entry for", versionStr);
                         console.log("  available versions are", keysStr(badgeSetData))
                     } else {
-                        var entry = {"name": versionObj.title, "url": badgeLocalUrl, "click_action": versionObj.click_action, "click_url": versionObj.click_url}
-                        console.log("adding entry", JSON.stringify(entry));
+                        var devicePixelRatio = 1.0;
+                        if (Util.endsWith(badgeLocalUrl, "-image_url_2x")) {
+                            devicePixelRatio = 2.0;
+                        } else if (Util.endsWith(badgeLocalUrl, "-image_url_4x")) {
+                            devicePixelRatio = 3.0;
+                        }
+                        var entry = {"name": versionObj.title, "url": badgeLocalUrl, "click_action": versionObj.click_action, "click_url": versionObj.click_url, "devicePixelRatio": devicePixelRatio}
+                        if (debugOutput) console.log("adding entry", JSON.stringify(entry));
+
                         badgeEntries.push(entry);
                         curBadgeAdded = true;
                     }
@@ -913,12 +952,14 @@ Item {
 
                 var badgeUrls = lastBadgeUrls[badgeName];
                 if (!curBadgeAdded && badgeUrls != null) {
-                    console.log("  badge urls:")
-                    for (var j in badgeUrls) {
-                        console.log("    key", j, "value", badgeUrls[j]);
+                    if (debugOutput) {
+                        console.log("  badge urls:")
+                        for (var j in badgeUrls) {
+                            console.log("    key", j, "value", badgeUrls[j]);
+                        }
                     }
-                    var entry = {"name": badgeName, "url": badgeLocalUrl};
-                    console.log("adding entry", JSON.stringify(entry));
+                    var entry = {"name": badgeName, "url": badgeLocalUrl, "devicePixelRatio": 1.0};
+                    if (debugOutput) console.log("adding entry", JSON.stringify(entry));
                     badgeEntries.push(entry);
                     curBadgeAdded = true;
                 }
@@ -987,4 +1028,5 @@ Item {
             chatModel.clear()
         }
     }
+}
 }

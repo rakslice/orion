@@ -815,54 +815,36 @@ Item {
         }
     }
 
-
-    Item {
-        id: chatControls
-        anchors {
-            top: parent.top
-            right: parent.right
-        }
-        width: chatview.width
-        height: dp(30)
-        visible: chatview.visible
-
-        IconButton {
-            id: _viewerListButton
-            icon: "list"
-
-            enabled: (!isVod && currentChannel && currentChannel.name) ? true : false
-
-            anchors {
-                top: parent.top
-                right: parent.right
-                rightMargin: 5
-                bottom: parent.bottom
-            }
-            width: height
-
-            onClicked: {
-                chatview.viewerListEnabled = !chatview.viewerListEnabled
-                if (chatview.viewerListEnabled && (chatview.status == 0)) {
-                    chatview.status++;
-                }
-            }
-
-            ToolTip {
-                visible: _viewerListButton.mouseArea.containsMouse
-                delay: 666
-                text: "Viewer List"
-            }
-        }
-    }
-
     ChatView {
         id: chatview
 
+        // Use JS so we can control the order the anchors are set.
+        // https://doc.qt.io/qt-5/qtquick-positioning-anchors.html#changing-anchors
         anchors {
-            top: chatControls.bottom
+            top: parent.top
             bottom: parent.bottom
-            left: g_cman.swapChat ? parent.left : undefined
-            right: !g_cman.swapChat ? parent.right : undefined
+        }
+
+        function updateAnchors() {
+            console.log("updateAnchors: g_cman.swapChat", g_cman.swapChat);
+            if (g_cman.swapChat) {
+                anchors.right = undefined;
+                anchors.left = parent.left;
+            } else {
+                anchors.left = undefined;
+                anchors.right = parent.right;
+            }
+        }
+
+        Component.onCompleted: {
+            chatview.updateAnchors();
+        }
+
+        Connections {
+            target: g_cman
+            onSwapChatChanged: {
+                chatview.updateAnchors();
+            }
         }
 
         width: visible && !smallMode ? dp(250) : 0
