@@ -63,7 +63,7 @@ Item{
             text: "Show offline notifications"
         }
 
-        OptionCombo {
+        OptionCornerSelect {
             id: alertPosition
             selection: g_cman.getAlertPosition()
 
