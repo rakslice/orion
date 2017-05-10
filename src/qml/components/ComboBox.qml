@@ -60,6 +60,15 @@ Rectangle {
         list.currentIndex = 0
     }
 
+    function selectItem(item) {
+        console.log("ComboBox selectItem", item);
+        var index = findIndex(item);
+        console.log("index", index);
+        if (index != null) {
+            list.currentIndex = index;
+        }
+    }
+
     color: Styles.shadeColor
 
     Rectangle {

@@ -28,7 +28,7 @@ Item {
     property bool isChannelNotice
     property bool isWhisper
     property string systemMessage
-    property int fontSize: Styles.titleFont.smaller
+    property int fontSize: Styles.titleFont.smaller * g_cman.textScaleFactor
     property var pmsg: JSON.parse(msg)
     property var badgeEntries: JSON.parse(jsonBadgeEntries)
     property var highlightOpacity: 1.0
@@ -41,6 +41,13 @@ Item {
     property var visibleBadgeEntries: showUsernameLine? badgeEntries : []
 
     height: childrenRect.height
+
+    onFontSizeChanged: {
+        // defer updatePositions so that bindings to the font size have a chance to recalculate before the re-layout
+        Qt.callLater(function() {
+            _messageLineFlow.updatePositions()
+        })
+    }
 
     function makeUrl(str) {
         var pref = "";
@@ -219,6 +226,7 @@ Item {
                   text: msgItem.textSuffix
                   color: msgItem.textSuffixColor
                   font.bold: true
+                  font.pixelSize: fontSize
                   verticalAlignment: Text.AlignVCenter
                   height: _emoteImg.height
               }
@@ -256,6 +264,7 @@ Item {
                   text: msgItem.textSuffix
                   color: msgItem.textSuffixColor
                   font.bold: true
+                  font.pixelSize: fontSize
                   verticalAlignment: Text.AlignVCenter
                   height: _animatedImg.height
               }

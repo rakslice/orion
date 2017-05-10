@@ -848,8 +848,8 @@ Item {
             }
         }
 
-        width: visible && !smallMode ? dp(250) : 0
-        chatWidth: dp(250)
+        width: visible && !smallMode ? chatWidth : 0
+        chatWidth: dp(250) * g_cman.textScaleFactor
 
         Behavior on width {
             NumberAnimation {
