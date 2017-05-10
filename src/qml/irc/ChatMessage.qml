@@ -213,8 +213,8 @@ Item {
               Image {
                 id: _emoteImg
 
-                width: sourceSize.width/(chat.getHiDpi()? 2.0 : 1.0)
-                height: sourceSize.height/(chat.getHiDpi()? 2.0 : 1.0)
+                width: sourceSize.width/(chat.getHiDpi()? 2.0 : 1.0)*g_cman.textScaleFactor
+                height: sourceSize.height/(chat.getHiDpi()? 2.0 : 1.0)*g_cman.textScaleFactor
 
                 Component.onCompleted: {
                   source = "image://" + msgItem.imageProvider + "/" + msgItem.imageId;
@@ -251,8 +251,8 @@ Item {
                 id: _animatedImg
 
                 // AnimatedImage doesn't provide a sourceSize properly even when status == AnimatedImage.Ready
-                width: 28
-                height: 28
+                width: 28 * g_cman.textScaleFactor
+                height: 28 * g_cman.textScaleFactor
 
                 Component.onCompleted: {
                   source = msgItem.sourceUrl;
@@ -289,8 +289,8 @@ Item {
               source = badgeEntry.url;
             }
 
-            width: sourceSize.width/badgeEntry.devicePixelRatio
-            height: sourceSize.height/badgeEntry.devicePixelRatio
+            width: sourceSize.width/badgeEntry.devicePixelRatio*g_cman.textScaleFactor
+            height: sourceSize.height/badgeEntry.devicePixelRatio*g_cman.textScaleFactor
 
             onStatusChanged: {
                 if (status == Image.Ready) {
