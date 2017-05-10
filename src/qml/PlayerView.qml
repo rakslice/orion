@@ -818,12 +818,13 @@ Item {
     ChatView {
         id: chatview
 
-        // Use JS so we can control the order the anchors are set.
-        // https://doc.qt.io/qt-5/qtquick-positioning-anchors.html#changing-anchors
         anchors {
             top: parent.top
             bottom: parent.bottom
         }
+
+        // Use JS for side anchors so we can control the order the anchors are set when we change them.
+        // https://doc.qt.io/qt-5/qtquick-positioning-anchors.html#changing-anchors
 
         function updateAnchors() {
             console.log("updateAnchors: g_cman.swapChat", g_cman.swapChat);
