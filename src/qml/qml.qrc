@@ -54,5 +54,6 @@
         <file>components/CommonGrid.qml</file>
         <file>components/ChannelGrid.qml</file>
         <file>components/OptionCornerSelect.qml</file>
+        <file>components/StreamSelectorComboBox.qml</file>
     </qresource>
 </RCC>

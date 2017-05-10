@@ -729,7 +729,7 @@ Item {
                 }   
             }
 
-            ComboBox {
+            StreamSelectorComboBox {
                 //Contains data for sources
                 id: sourcesBox
                 width: dp(90)
