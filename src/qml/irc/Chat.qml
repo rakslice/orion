@@ -137,6 +137,7 @@ Item {
         id: chat
 
         onConnectedChanged: {
+            console.log("OnConnectedChanged", connected)
             if (connected) {
                 if (root.channel) {
                     if (root.replayMode) {
@@ -147,6 +148,9 @@ Item {
                     }
                 }
             } else {
+                if (!root.replayMode) {
+                    root.messageReceived("notice", null, "", false, false, false, [], true, "Left due to disconnect", false);
+                }
                 console.log("Disconnected from chat")
             }
         }
