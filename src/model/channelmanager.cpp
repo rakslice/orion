@@ -326,6 +326,10 @@ void ChannelManager::setAccessToken(const QString &arg)
     }
 
     else {
+        // if we just logged out there are user settings to clear
+        user_id = 0;
+        user_name = "";
+
         //Reload local favourites from memory
         if (tempFavourites) {
             delete favouritesModel;
