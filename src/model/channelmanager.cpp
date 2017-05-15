@@ -379,21 +379,22 @@ void ChannelManager::load(){
         minimizeOnStartup = settings.value("minimizeOnStartup").toBool();
     }
 
-    if (settings.contains("channels")) {
+    int size = settings.beginReadArray("channels");
+    if (size > 0) {
         QList<Channel*> _channels;
 
-        int size = settings.beginReadArray("channels");
-
-        for(int i=0; i<size; i++){
+        for (int i = 0; i < size; i++) {
             settings.setArrayIndex(i);
-            _channels.append(new Channel(settings));
+            Channel * channel = new Channel(settings);
+            channel->setFavourite(false); // for visual consistency we don't want to show favourite highlight on entries in the favourites model
+            _channels.append(channel);
         }
-        settings.endArray();
 
         favouritesModel->addAll(_channels);
 
         qDeleteAll(_channels);
     }
+    settings.endArray();
 
     if (settings.contains("access_token")) {
         setAccessToken(settings.value("access_token").toString());
