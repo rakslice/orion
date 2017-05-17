@@ -408,12 +408,36 @@ void NetworkManager::loadChatterList(const QString channel) {
     connect(reply, SIGNAL(finished()), this, SLOT(chatterListReply()));
 }
 
+void NetworkManager::getBlockedUserList(const QString &access_token, const quint64 userId, const quint32 offset, const quint32 limit) {
+    qDebug() << "Loading blocked user list for user" << userId;
+    const QString url = QString(KRAKEN_API) + QString("/users/") + QString::number(userId) + QString("/blocks?offset=" + QString::number(offset) + "&limit=" + QString::number(limit) );
+    qDebug() << "Request" << url;
+
+    QNetworkRequest request;
+    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    request.setRawHeader("Client-ID", getClientId().toUtf8());
+    request.setUrl(url);
+
+    int nextOffset = offset + limit;
+    request.setAttribute(QNetworkRequest::User, nextOffset);
+
+    QString auth = "OAuth " + access_token;
+    request.setRawHeader(QString("Authorization").toUtf8(), auth.toUtf8());
+
+    QNetworkReply *reply = operation->get(request);
+
+    connect(reply, SIGNAL(finished()), this, SLOT(blockedUserListReply()));
+}
+
+
 void NetworkManager::chatterListReply() {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
     if (!handleNetworkError(reply)) {
         return;
     }
+
+    reply->url().query();
 
     QByteArray data = reply->readAll();
 
@@ -422,6 +446,28 @@ void NetworkManager::chatterListReply() {
     QMap<QString, QList<QString>> ret = JsonParser::parseChatterList(data);
 
     emit chatterListLoadOperationFinished(ret);
+
+    reply->deleteLater();
+}
+
+void NetworkManager::blockedUserListReply() {
+    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+
+    if (!handleNetworkError(reply)) {
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (statusCode == 401) {
+            qWarning() << "Warning: Not authorized to read blocked users list; logout and log in again to update OAuth scopes";
+        }
+        return;
+    }
+
+    QByteArray data = reply->readAll();
+
+    QList<QString> ret = JsonParser::parseBlockList(data);
+
+    int nextOffset = reply->attribute(QNetworkRequest::User).toInt();
+
+    emit blockedUserListLoadOperationFinished(ret, nextOffset);
 
     reply->deleteLater();
 }

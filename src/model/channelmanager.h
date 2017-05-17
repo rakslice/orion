@@ -120,6 +120,11 @@ protected:
     BadgeImageProvider badgeImageProvider;
     BitsImageProvider bitsImageProvider;
 
+    QList<QString> blockedUserListLoading;
+
+    static const quint32 BLOCKED_USER_LIST_FETCH_LIMIT;
+    void getBlockedUserList();
+
 public:
     ChannelManager(NetworkManager *netman, bool hiDpi);
     ~ChannelManager();
@@ -290,6 +295,7 @@ signals:
     void vodChatPieceGetOperationFinished(QList<ReplayChatMessage>);
 
     void chatterListLoaded(QVariantMap chatters);
+    void blockedUsersLoaded(const QSet<QString> &);
 
 public slots:
     void checkFavourites();
@@ -321,6 +327,7 @@ private slots:
     void addFollowedResults(const QList<Channel*>&, const quint32);
     void onNetworkAccessChanged(bool);
     void processChatterList(QMap<QString, QList<QString>> chatters);
+    void addBlockedUserResults(const QList<QString> & list, const quint32 nextOffset);
 };
 
 #endif //CHANNEL_MANAGER_H

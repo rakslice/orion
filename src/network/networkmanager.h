@@ -87,6 +87,7 @@ public:
     Q_INVOKABLE void cancelLastVodChatRequest();
     Q_INVOKABLE void resetVodChat();
     Q_INVOKABLE void loadChatterList(const QString channel);
+    void getBlockedUserList(const QString &access_token, const quint64 userId, const quint32 offset, const quint32 limit);
 
     QNetworkAccessManager *getManager() const;
 
@@ -122,6 +123,7 @@ signals:
     void vodStartGetOperationFinished(double);
     void vodChatPieceGetOperationFinished(QList<ReplayChatMessage>);
     void chatterListLoadOperationFinished(QMap<QString, QList<QString>>);
+    void blockedUserListLoadOperationFinished(QList<QString>, const quint32 nextOffset);
 
     void getChannelBitsUrlsOperationFinished(int channelID, BitsQStringsMap channelBitsUrls, BitsQStringsMap channelBitsColors);
     void getGlobalBitsUrlsOperationFinished(BitsQStringsMap globalBitsUrls, BitsQStringsMap globalBitsColors);
@@ -148,6 +150,7 @@ private slots:
     void vodStartReply();
     void vodChatPieceReply();
     void chatterListReply();
+    void blockedUserListReply();
 
     //Oauth slots
     void userReply();

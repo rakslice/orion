@@ -116,6 +116,7 @@ void IrcChat::hookupChannelProviders(ChannelManager * cman) {
         connect(_cman, &ChannelManager::vodStartGetOperationFinished, this, &IrcChat::handleVodStartTime);
         connect(_cman, &ChannelManager::vodChatPieceGetOperationFinished, this, &IrcChat::handleDownloadedReplayChat);
         connect(_cman, &ChannelManager::channelBitsUrlsLoaded, this, &IrcChat::handleChannelBitsUrlsLoaded);
+        connect(_cman, &ChannelManager::blockedUsersLoaded, this, &IrcChat::blockedUsersLoaded);
     }
     else {
         qDebug() << "hookupChannelProviders got null";
@@ -1005,6 +1006,11 @@ void IrcChat::parseCommand(QString cmd) {
             return;
         }
 
+        if (blockedUsers.contains(parse.chatMessage.name.toLower())) {
+            qDebug() << "Dropping blocked user" << parse.chatMessage.name << "message";
+            return;
+        }
+
 		// parse IRC action before applying emotes, as emote indices are relative to the content of the action
 		const QString ACTION_PREFIX = QString(QChar(1)) + "ACTION ";
 		const QString ACTION_SUFFIX = QString(QChar(1));
@@ -1065,6 +1071,11 @@ void IrcChat::parseCommand(QString cmd) {
         parseMessageCommand(cmd, "WHISPER", parse);
 
         if (parse.wrongChannel) {
+            return;
+        }
+
+        if (blockedUsers.contains(parse.chatMessage.name.toLower())) {
+            qDebug() << "Dropping blocked user" << parse.chatMessage.name << "whisper";
             return;
         }
 
@@ -1197,4 +1208,8 @@ void IrcChat::handleDownloadComplete() {
 
 void IrcChat::bulkDownloadEmotes(QList<QString> keys) {
     _emoteProvider.bulkDownload(keys);
+}
+
+void IrcChat::blockedUsersLoaded(const QSet<QString> & newBlockedUsers) {
+    blockedUsers = newBlockedUsers;
 }

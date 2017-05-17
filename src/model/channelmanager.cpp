@@ -192,6 +192,7 @@ ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netm
     connect(netman, SIGNAL(vodStartGetOperationFinished(double)), this, SIGNAL(vodStartGetOperationFinished(double)));
     connect(netman, SIGNAL(vodChatPieceGetOperationFinished(QList<ReplayChatMessage>)), this, SIGNAL(vodChatPieceGetOperationFinished(QList<ReplayChatMessage>)));
     connect(netman, SIGNAL(chatterListLoadOperationFinished(QMap<QString, QList<QString>>)), this, SLOT(processChatterList(QMap<QString, QList<QString>>)));
+    connect(netman, SIGNAL(blockedUserListLoadOperationFinished(const QList<QString> &, const quint32)), this, SLOT(addBlockedUserResults(const QList<QString> &, const quint32)));
 
     connect(netman, SIGNAL(networkAccessChanged(bool)), this, SLOT(onNetworkAccessChanged(bool)));
     load();
@@ -716,6 +717,7 @@ void ChannelManager::onUserUpdated(const QString &name, const quint64 userId)
 
         //Start using user followed channels
         getFollowedChannels(FOLLOWED_FETCH_LIMIT, 0);
+        getBlockedUserList();
     }
 }
 
@@ -967,6 +969,30 @@ void ChannelManager::addFollowedResults(const QList<Channel *> &list, const quin
     qDeleteAll(list);
 
     emit followedUpdated();
+}
+
+const quint32 ChannelManager::BLOCKED_USER_LIST_FETCH_LIMIT = 100;
+
+void ChannelManager::getBlockedUserList()
+{
+    quint32 limit = 100;
+    blockedUserListLoading.clear();
+    netman->getBlockedUserList(accessToken(), user_id, 0, BLOCKED_USER_LIST_FETCH_LIMIT);
+
+}
+
+void ChannelManager::addBlockedUserResults(const QList<QString> & list, const quint32 nextOffset)
+{
+    if (!user_id || accessToken().isEmpty()) return;
+
+    blockedUserListLoading.append(list);
+
+    if (list.size() == BLOCKED_USER_LIST_FETCH_LIMIT) {
+        netman->getBlockedUserList(accessToken(), user_id, nextOffset, BLOCKED_USER_LIST_FETCH_LIMIT);
+    }
+    else {
+        emit blockedUsersLoaded(blockedUserListLoading.toSet());
+    }
 }
 
 void ChannelManager::processChatterList(QMap<QString, QList<QString>> chatters)

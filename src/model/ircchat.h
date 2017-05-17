@@ -134,6 +134,7 @@ private slots:
     void handleVodStartTime(double);
     void handleDownloadedReplayChat(QList<ReplayChatMessage>);
     void handleChannelBitsUrlsLoaded(const int channelID, BitsQStringsMap bitsUrls);
+    void blockedUsersLoaded(const QSet<QString> &);
 
 private:
     static bool hiDpi;
@@ -152,6 +153,8 @@ private:
     ChannelManager * _cman;
     
     QList<ChatMessage> msgQueue;
+
+    QSet<QString> blockedUsers;
 
     void parseCommand(QString cmd);
 

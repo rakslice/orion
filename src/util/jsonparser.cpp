@@ -681,3 +681,27 @@ QMap<QString, QList<QString>> JsonParser::parseChatterList(const QByteArray &dat
     return out;
     
 }
+
+QList<QString> JsonParser::parseBlockList(const QByteArray &data)
+{
+    QList<QString> out;
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error == QJsonParseError::NoError) {
+        QJsonObject json = doc.object();
+
+        QJsonArray blocks = json["blocks"].toArray();
+
+        for (const auto & block : blocks) {
+            const auto & blockObj = block.toObject();
+            const auto & name = blockObj["user"].toObject()["name"].toString();
+            if (!name.isEmpty()) {
+                out.append(name);
+            }
+        }
+    }
+
+    return out;
+}
