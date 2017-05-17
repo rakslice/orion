@@ -522,9 +522,9 @@ void IrcChat::sendMessage(const QString &msg, const QVariantMap &relevantEmotes)
             }
         }
         
-        for (const QString & prefix : { "/block ", "/unblock " }) {
+        for (const QString & prefix : { "/block ", "/ignore ", "/unblock ", "/unignore " }) {
             if (displayMessage.toLower().startsWith(prefix)) {
-                bool isBlock = prefix == "/block ";
+                bool isBlock = (prefix == "/block ") || (prefix == "/ignore ");
                 QString username = displayMessage.mid(prefix.length());
                 setUserBlock(username, isBlock);
                 return;
@@ -1231,7 +1231,7 @@ void IrcChat::setUserBlock(const QString & username, const bool blocked) {
 
 void IrcChat::userBlocked(const QString & blockedUsername) {
     QString newBlockedUsername = blockedUsername.toLower();
-    emit noticeReceived("Blocked user " + blockedUsername);
+    emit noticeReceived("User " + blockedUsername + " successfully ignored");
     if (!blockedUsers.contains(newBlockedUsername)) {
         blockedUsers.insert(newBlockedUsername);
     }
@@ -1239,7 +1239,7 @@ void IrcChat::userBlocked(const QString & blockedUsername) {
 
 void IrcChat::userUnblocked(const QString & unblockedUsername) {
     QString newUnblockedUsername = unblockedUsername.toLower();
-    emit noticeReceived("Unblocked user " + newUnblockedUsername);
+    emit noticeReceived("User " + newUnblockedUsername + " successfully unignored");
     if (blockedUsers.contains(newUnblockedUsername)) {
         blockedUsers.remove(newUnblockedUsername);
     }
