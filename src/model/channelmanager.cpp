@@ -978,10 +978,8 @@ const quint32 ChannelManager::BLOCKED_USER_LIST_FETCH_LIMIT = 100;
 
 void ChannelManager::getBlockedUserList()
 {
-    quint32 limit = 100;
     blockedUserListLoading.clear();
     netman->getBlockedUserList(accessToken(), user_id, 0, BLOCKED_USER_LIST_FETCH_LIMIT);
-
 }
 
 void ChannelManager::addBlockedUserResults(const QList<QString> & list, const quint32 nextOffset)
