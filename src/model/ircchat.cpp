@@ -79,11 +79,11 @@ void IrcChat::initSocket() {
         emit errorOccured("Error creating socket");
     }
     else {
-        connect(sock, SIGNAL(readyRead()), this, SLOT(receive()));
-        connect(sock, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(processError(QAbstractSocket::SocketError)));
-        connect(sock, SIGNAL(connected()), this, SLOT(login()));
-        connect(sock, SIGNAL(connected()), this, SLOT(onSockStateChanged()));
-        connect(sock, SIGNAL(disconnected()), this, SLOT(onSockStateChanged()));
+        connect(sock, &QTcpSocket::readyRead, this, &IrcChat::receive);
+        connect(sock, static_cast<void (QTcpSocket::*)(QAbstractSocket::SocketError)>(&QTcpSocket::error), this, &IrcChat::processError);
+        connect(sock, &QTcpSocket::connected, this, &IrcChat::login);
+        connect(sock, &QTcpSocket::connected, this, &IrcChat::onSockStateChanged);
+        connect(sock, &QTcpSocket::disconnected, this, &IrcChat::onSockStateChanged);
     }
 }
 
