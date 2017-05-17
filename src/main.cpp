@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     SysTray *tray = new SysTray();
     tray->setIcon(appIcon);
 
-    QObject::connect(tray, SIGNAL(closeEventTriggered()), &app, SLOT(quit()));
+    QObject::connect(tray, &SysTray::closeEventTriggered, &app, &CustomApp::quit);
 
     //Prime network manager
     QNetworkProxyFactory::setUseSystemConfiguration(true);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
     //Http server used for auth
     HttpServer *httpserver = new HttpServer(&app);
-    QObject::connect(httpserver, SIGNAL(codeReceived(QString)), cman, SLOT(setAccessToken(QString)));
+    QObject::connect(httpserver, &HttpServer::codeReceived, cman, &ChannelManager::setAccessToken);
     //-------------------------------------------------------------------------------------------------------------------//
 
     qreal dpiMultiplier = QGuiApplication::primaryScreen()->logicalDotsPerInch();
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 
     //Set up notifications
     NotificationManager *notificationManager = new NotificationManager(&engine, engine.networkAccessManager());
-    QObject::connect(cman, SIGNAL(pushNotification(QString,QString,QString)), notificationManager, SLOT(pushNotification(QString,QString,QString)));
+    QObject::connect(cman, &ChannelManager::pushNotification, notificationManager, &NotificationManager::pushNotification);
 
     qDebug() << "Starting window...";
     tray->show();
