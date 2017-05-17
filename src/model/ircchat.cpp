@@ -117,6 +117,8 @@ void IrcChat::hookupChannelProviders(ChannelManager * cman) {
         connect(_cman, &ChannelManager::vodChatPieceGetOperationFinished, this, &IrcChat::handleDownloadedReplayChat);
         connect(_cman, &ChannelManager::channelBitsUrlsLoaded, this, &IrcChat::handleChannelBitsUrlsLoaded);
         connect(_cman, &ChannelManager::blockedUsersLoaded, this, &IrcChat::blockedUsersLoaded);
+        connect(_cman, &ChannelManager::userBlocked, this, &IrcChat::userBlocked);
+        connect(_cman, &ChannelManager::userUnblocked, this, &IrcChat::userUnblocked);
     }
     else {
         qDebug() << "hookupChannelProviders got null";
@@ -517,6 +519,15 @@ void IrcChat::sendMessage(const QString &msg, const QVariantMap &relevantEmotes)
                 recipient = displayMessage.left(spacePos);
                 displayMessage = displayMessage.mid(spacePos + 1);
                 break;
+            }
+        }
+        
+        for (const QString & prefix : { "/block ", "/unblock " }) {
+            if (displayMessage.toLower().startsWith(prefix)) {
+                bool isBlock = prefix == "/block ";
+                QString username = displayMessage.mid(prefix.length());
+                setUserBlock(username, isBlock);
+                return;
             }
         }
 
@@ -1212,4 +1223,24 @@ void IrcChat::bulkDownloadEmotes(QList<QString> keys) {
 
 void IrcChat::blockedUsersLoaded(const QSet<QString> & newBlockedUsers) {
     blockedUsers = newBlockedUsers;
+}
+
+void IrcChat::setUserBlock(const QString & username, const bool blocked) {
+    _cman->editUserBlock(username, blocked);
+}
+
+void IrcChat::userBlocked(const QString & blockedUsername) {
+    QString newBlockedUsername = blockedUsername.toLower();
+    emit noticeReceived("Blocked user " + blockedUsername);
+    if (!blockedUsers.contains(newBlockedUsername)) {
+        blockedUsers.insert(newBlockedUsername);
+    }
+}
+
+void IrcChat::userUnblocked(const QString & unblockedUsername) {
+    QString newUnblockedUsername = unblockedUsername.toLower();
+    emit noticeReceived("Unblocked user " + newUnblockedUsername);
+    if (blockedUsers.contains(newUnblockedUsername)) {
+        blockedUsers.remove(newUnblockedUsername);
+    }
 }

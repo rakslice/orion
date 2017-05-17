@@ -413,6 +413,29 @@ QPair<QString, quint64> JsonParser::parseUser(const QByteArray &data)
     return qMakePair(displayName, userId);
 }
 
+QList<quint64> JsonParser::parseUsers(const QByteArray &data)
+{
+    QList<quint64> out;
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error == QJsonParseError::NoError) {
+        QJsonObject json = doc.object();
+        for (const auto & user : json["users"].toArray()) {
+            auto userId = user.toObject()["_id"];
+            if (userId.isDouble()) {
+                out.append(static_cast<quint64>(userId.toDouble()));
+            }
+            else {
+                out.append(userId.toString().toULongLong());
+            }
+        }
+    }
+
+    return out;
+}
+
 QMap<int, QMap<int, QString>> JsonParser::parseEmoteSets(const QByteArray &data) {
     QMap<int, QMap<int, QString>> out;
 

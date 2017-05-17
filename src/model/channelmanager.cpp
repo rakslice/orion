@@ -192,7 +192,10 @@ ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netm
     connect(netman, SIGNAL(vodStartGetOperationFinished(double)), this, SIGNAL(vodStartGetOperationFinished(double)));
     connect(netman, SIGNAL(vodChatPieceGetOperationFinished(QList<ReplayChatMessage>)), this, SIGNAL(vodChatPieceGetOperationFinished(QList<ReplayChatMessage>)));
     connect(netman, SIGNAL(chatterListLoadOperationFinished(QMap<QString, QList<QString>>)), this, SLOT(processChatterList(QMap<QString, QList<QString>>)));
+
     connect(netman, SIGNAL(blockedUserListLoadOperationFinished(const QList<QString> &, const quint32)), this, SLOT(addBlockedUserResults(const QList<QString> &, const quint32)));
+    connect(netman, &NetworkManager::userBlocked, this, &ChannelManager::innerUserBlocked);
+    connect(netman, &NetworkManager::userUnblocked, this, &ChannelManager::innerUserUnblocked);
 
     connect(netman, SIGNAL(networkAccessChanged(bool)), this, SLOT(onNetworkAccessChanged(bool)));
     load();
@@ -1066,4 +1069,22 @@ void ChannelManager::setOfflineNotifications(bool value) {
 
 bool ChannelManager::getOfflineNotifications() {
     return offlineNotifications;
+}
+
+void ChannelManager::editUserBlock(const QString & blockUserName, const bool isBlock) {
+    if (isAccessTokenAvailable()) {
+        netman->editUserBlock(accessToken(), user_id, blockUserName, isBlock);
+    }
+}
+
+void ChannelManager::innerUserBlocked(quint64 myUserId, const QString & blockedUsername) {
+    if (user_id == myUserId) {
+        emit userBlocked(blockedUsername);
+    }
+}
+
+void ChannelManager::innerUserUnblocked(quint64 myUserId, const QString & unblockedUsername) {
+    if (user_id == myUserId) {
+        emit userUnblocked(unblockedUsername);
+    }
 }

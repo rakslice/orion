@@ -192,6 +192,8 @@ public:
 
     void setOfflineNotifications(bool value);
     bool getOfflineNotifications();
+
+    void editUserBlock(const QString & blockUserName, const bool isBlock);
     
     BadgeImageProvider * getBadgeImageProvider() {
         return &badgeImageProvider;
@@ -297,6 +299,9 @@ signals:
     void chatterListLoaded(QVariantMap chatters);
     void blockedUsersLoaded(const QSet<QString> &);
 
+    void userBlocked(const QString & blockedUsername);
+    void userUnblocked(const QString & unblockedUsername);
+
 public slots:
     void checkFavourites();
     void addToFavourites(const quint32&);
@@ -328,6 +333,8 @@ private slots:
     void onNetworkAccessChanged(bool);
     void processChatterList(QMap<QString, QList<QString>> chatters);
     void addBlockedUserResults(const QList<QString> & list, const quint32 nextOffset);
+    void innerUserBlocked(quint64 myUserId, const QString & blockedUsername);
+    void innerUserUnblocked(quint64 myUserId, const QString & unblockedUsername);
 };
 
 #endif //CHANNEL_MANAGER_H

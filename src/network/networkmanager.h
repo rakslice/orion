@@ -88,6 +88,7 @@ public:
     Q_INVOKABLE void resetVodChat();
     Q_INVOKABLE void loadChatterList(const QString channel);
     void getBlockedUserList(const QString &access_token, const quint64 userId, const quint32 offset, const quint32 limit);
+    void editUserBlock(const QString &access_token, const quint64 myUserId, const QString & blockUserName, const bool isBlock);
 
     QNetworkAccessManager *getManager() const;
 
@@ -130,6 +131,9 @@ signals:
 
     void networkAccessChanged(bool up);
 
+    void userBlocked(quint64 myUserId, const QString & blockedUsername);
+    void userUnblocked(quint64 myUserId, const QString & unblockedUsername);
+
 private slots:
     void testNetworkInterface();
     void testConnection();
@@ -151,6 +155,7 @@ private slots:
     void vodChatPieceReply();
     void chatterListReply();
     void blockedUserListReply();
+    void blockUserReply();
 
     //Oauth slots
     void userReply();
@@ -160,6 +165,7 @@ private slots:
     void globalBadgeUrlsBetaReply();
     void channelBitsUrlsReply();
     void globalBitsUrlsReply();
+    void blockUserLookupReply();
 
 private:
     static const QString CHANNEL_BADGES_URL_PREFIX;
@@ -183,6 +189,8 @@ private:
     void filterReplayChat(QList<ReplayChatMessage> & replayChat);
 
     QNetworkReply *lastVodChatRequest;
+
+    void editUserBlockWithId(const QString &access_token, const quint64 myUserId, const QString & blockUsername, const quint64 blockUserId, const bool isBlock);
 };
 
 #endif // NETWORKMANAGER_H
