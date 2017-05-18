@@ -139,14 +139,13 @@ void ChannelListModel::mergeAll(const QList<Channel *> &list)
 
 void ChannelListModel::removeChannel(Channel *channel)
 {
-    auto indexEntry = channelsIndex.find(channel->getId());
-    if (indexEntry != channelsIndex.end() && indexEntry.value() == channel) {
-        channelsIndex.erase(indexEntry);
-    }
-
     int index = channels.indexOf(channel);
     if (index > -1){
         beginRemoveRows(QModelIndex(), index, index);
+        auto indexEntry = channelsIndex.find(channel->getId());
+        if (indexEntry != channelsIndex.end() && indexEntry.value() == channel) {
+            channelsIndex.erase(indexEntry);
+        }
         delete channels.takeAt(index);
         endRemoveRows();
     }
