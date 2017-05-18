@@ -94,10 +94,21 @@ int ChannelListModel::rowCount(const QModelIndex &/*parent*/) const
     return channels.size();
 }
 
+void ChannelListModel::addChannelInternal(Channel *channel) {
+    channels.append(channel);
+    auto id = channel->getId();
+    if (id == 0) {
+        qDebug() << "inserting new channel with 0 id";
+    }
+    else {
+        channelsIndex.insert(id, channel);
+    }
+}
+
 void ChannelListModel::addChannel(Channel *channel)
 {
     beginInsertRows(QModelIndex(), channels.size(), channels.size());
-    channels.append(channel);
+    addChannelInternal(channel);
     endInsertRows();
 }
 
@@ -106,9 +117,8 @@ void ChannelListModel::addAll(const QList<Channel *> &list)
     if (!list.isEmpty()){
         beginInsertRows(QModelIndex(), channels.size(), channels.size() + list.size() - 1);
         foreach (Channel* channel, list){
-            channels.append(new Channel(*channel));
+            addChannelInternal(new Channel(*channel));
         }
-
         endInsertRows();
     }
 }
@@ -129,6 +139,11 @@ void ChannelListModel::mergeAll(const QList<Channel *> &list)
 
 void ChannelListModel::removeChannel(Channel *channel)
 {
+    auto indexEntry = channelsIndex.find(channel->getId());
+    if (indexEntry != channelsIndex.end() && indexEntry.value() == channel) {
+        channelsIndex.erase(indexEntry);
+    }
+
     int index = channels.indexOf(channel);
     if (index > -1){
         beginRemoveRows(QModelIndex(), index, index);
@@ -137,22 +152,11 @@ void ChannelListModel::removeChannel(Channel *channel)
     }
 }
 
-Channel *ChannelListModel::find(const QString &q)
-{
-    foreach(Channel *channel, channels){
-        if (channel->getServiceName() == q){
-            return channel;
-        }
-    }
-    return nullptr;
-}
-
 Channel *ChannelListModel::find(const quint32 &id)
 {
-    foreach(Channel *channel, channels){
-        if (channel->getId() == id){
-            return channel;
-        }
+    auto indexEntry = channelsIndex.find(id);
+    if (indexEntry != channelsIndex.end()) {
+        return indexEntry.value();
     }
     return nullptr;
 }
@@ -170,6 +174,7 @@ void ChannelListModel::clear()
         beginRemoveRows(QModelIndex(), 0, channels.size());
         qDeleteAll(channels);
         channels.clear();
+        channelsIndex.clear();
         endRemoveRows();
     }
 }
@@ -214,9 +219,13 @@ QHash<int, QByteArray> ChannelListModel::roleNames() const
 
 void ChannelListModel::updateChannel(Channel *item)
 {
-    if (item && !item->getServiceName().isEmpty()){
+    if (item){
+        if (item->getId() == 0) {
+            qDebug() << "updateChannel with id==0 item";
+            return;
+        }
 
-        if (Channel *channel = find(item->getServiceName())){
+        if (Channel *channel = find(item->getId())){
             channel->updateWith(*item);
             updateChannelForView(channel);
         }
@@ -276,12 +285,15 @@ bool ChannelListModel::updateStream(Channel *item)
 
 void ChannelListModel::setAllChannelsOffline()
 {
+    int i = 0;
     foreach(Channel *channel, channels) {
         if (channel->isOnline()) {
             channel->setOnline(false);
-            updateChannelForView(channel);
+            //updateChannelForView(channel);
+            emit dataChanged(index(i), index(i));
             emit channelOnlineStateChanged(channel);
         }
+        i++;
     }
 }
 
