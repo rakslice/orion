@@ -498,10 +498,6 @@ void ChannelManager::addToFavourites(const quint32 &id){
     }
 }
 
-Channel* ChannelManager::findFavourite(const QString &q){
-    return favouritesModel->find(q);
-}
-
 void ChannelManager::removeFromFavourites(const quint32 &id){
     Channel *chan = favouritesModel->find(id);
 

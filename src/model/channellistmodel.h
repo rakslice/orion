@@ -46,7 +46,6 @@ public:
     void mergeAll(const QList<Channel*> &);
 
     void removeChannel(Channel*);
-    Channel* find(const QString&);
     Channel* find(const quint32&);
     void clearView();
     void clear();

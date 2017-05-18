@@ -152,16 +152,6 @@ void ChannelListModel::removeChannel(Channel *channel)
     }
 }
 
-Channel *ChannelListModel::find(const QString &q)
-{
-    foreach(Channel *channel, channels){
-        if (channel->getServiceName() == q){
-            return channel;
-        }
-    }
-    return nullptr;
-}
-
 Channel *ChannelListModel::find(const quint32 &id)
 {
     auto indexEntry = channelsIndex.find(id);
