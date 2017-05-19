@@ -42,7 +42,7 @@ public:
     void setAllChannelsOffline();
 
     void addChannel(Channel*);
-    void addAll(const QList<Channel*> &);
+    int addAll(const QList<Channel*> &);
     void mergeAll(const QList<Channel*> &);
 
     void removeChannel(Channel*);
@@ -76,8 +76,9 @@ signals:
 private:
     Q_DISABLE_COPY(ChannelListModel)
     QList<Channel*> channels;
-    QMap<quint32, Channel *> channelsIndex;
+    QHash<quint32, Channel *> channelIdIndex;
     void addChannelInternal(Channel *);
+    bool updateChannelIfExisting(const Channel *);
 };
 
 #endif // CHANNELCOLLECTION_H

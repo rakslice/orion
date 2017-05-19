@@ -593,14 +593,14 @@ void ChannelManager::addSearchResults(const QList<Channel*> &list)
             needsStreamCheck = true;
     }
 
-    resultsModel->addAll(list);
+    int numAdded = resultsModel->addAll(list);
 
     if (needsStreamCheck)
         checkStreams(list);
 
     qDeleteAll(list);
 
-    emit resultsUpdated();
+    emit resultsUpdated(numAdded);
 }
 
 void ChannelManager::getFeatured()
