@@ -269,7 +269,7 @@ public:
 
 signals:
     void pushNotification(const QString &title, const QString &message, const QString &imgUrl);
-    void resultsUpdated();
+    void resultsUpdated(int numAdded);
     void featuredUpdated();
     void searchingStarted();
     void foundPlaybackStream(const QVariantMap &streams);
