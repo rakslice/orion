@@ -196,6 +196,7 @@ private:
     bool allDownloadsComplete();
 
     bool replayChatRequestInProgress;
+    bool replayChatFirstLoadAfterSeek;
     
     double replayChatVodStartTime;
     double replayChatFirstChunkTime;
