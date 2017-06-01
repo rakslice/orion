@@ -272,7 +272,7 @@ public:
 
 signals:
     void pushNotification(const QString &title, const QString &message, const QString &imgUrl);
-    void resultsUpdated(int numAdded);
+    void resultsUpdated(int numAdded, int total);
     void featuredUpdated();
     void searchingStarted();
     void foundPlaybackStream(const QVariantMap &streams);
@@ -321,7 +321,7 @@ public slots:
     void setAccessToken(const QString &arg);
 
 private slots:
-    void addSearchResults(const QList<Channel*>&);
+    void addSearchResults(const QList<Channel*>&, const int total);
     void addFeaturedResults(const QList<Channel*>&);
     void updateFavourites(const QList<Channel*>&);
     void updateStreams(const QList<Channel*>&);
