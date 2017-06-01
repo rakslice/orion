@@ -72,6 +72,7 @@ Item {
         g_cman.loadChannelBadgeUrls(channelId);
         g_cman.loadChannelBetaBadgeUrls(channelId);
         g_cman.loadChannelBitsUrls(channelId);
+        g_cman.loadChannelBttvEmotes(channelName);
     }
 
     function joinChannel(channelName, channelId) {
