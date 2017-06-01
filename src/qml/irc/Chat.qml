@@ -28,6 +28,7 @@ Item {
     signal bulkDownloadComplete()
     signal channelBadgeUrlsLoaded(int channelId, var badgeUrls)
     signal channelBadgeBetaUrlsLoaded(string channel, var badgeSetData)
+    signal bttvEmotesLoaded(string channel, var emotesByCode)
 
     property alias isAnonymous: chat.anonymous
     property var channel: undefined
@@ -124,6 +125,14 @@ Item {
         return chat.bulkDownloadEmotes(emotes);
     }
 
+    function downloadBttvEmotesGlobal() {
+        return chat.downloadBttvEmotesGlobal();
+    }
+
+    function downloadBttvEmotesChannel() {
+        return chat.downloadBttvEmotesChannel();
+    }
+
     function reconnect() {
         leaveChannel()
         if (root.channel)
@@ -168,6 +177,10 @@ Item {
 
         onBulkDownloadComplete: {
             root.bulkDownloadComplete();
+        }
+
+        onBttvEmotesLoaded: {
+            root.bttvEmotesLoaded(channel, emotesByCode);
         }
     }
 }

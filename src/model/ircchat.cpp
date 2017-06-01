@@ -1303,6 +1303,22 @@ void IrcChat::bulkDownloadEmotes(QList<QString> keys) {
     _emoteProvider.bulkDownload(keys);
 }
 
+QList<QString> valuesList(const QMap<QString, QString> & map) {
+    QList<QString> out;
+    for (auto entry = map.constBegin(); entry != map.constEnd(); entry++) {
+        out.append(entry.value());
+    }
+    return out;
+}
+
+void IrcChat::downloadBttvEmotesGlobal() {
+    _bttvEmoteProvider.bulkDownload(valuesList(lastGlobalBttvEmoteFixedStrings));
+}
+
+void IrcChat::downloadBttvEmotesChannel() {
+    _bttvEmoteProvider.bulkDownload(valuesList(lastCurChannelBttvEmoteFixedStrings));
+}
+
 void IrcChat::blockedUsersLoaded(const QSet<QString> & newBlockedUsers) {
     blockedUsers = newBlockedUsers;
 }
@@ -1327,6 +1343,15 @@ void IrcChat::userUnblocked(const QString & unblockedUsername) {
     }
 }
 
+template <typename U>
+QVariantMap toVariantMap(const QMap<QString, U> & map) {
+    QVariantMap out;
+    for (auto entry = map.constBegin(); entry != map.constEnd(); entry++) {
+        out.insert(entry.key(), entry.value());
+    }
+    return out;
+}
+
 void IrcChat::handleChannelBttvEmotesLoaded(const QString & channelName, QMap<QString, QString> emotesByCode) {
     const QString GLOBAL_EMOTES_ID = "GLOBAL";
     if (channelName == GLOBAL_EMOTES_ID) {
@@ -1335,5 +1360,7 @@ void IrcChat::handleChannelBttvEmotesLoaded(const QString & channelName, QMap<QS
     else if (channelName == room) {
         lastCurChannelBttvEmoteFixedStrings = emotesByCode;
     }
+
+    emit bttvEmotesLoaded(channelName, toVariantMap(emotesByCode));
 }
 

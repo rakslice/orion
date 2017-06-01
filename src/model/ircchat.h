@@ -119,6 +119,8 @@ signals:
     bool downloadError();
 
     void bulkDownloadComplete();
+
+    void bttvEmotesLoaded(QString channel, QVariantMap emotesByCode);
     
 public slots:
     void sendMessage(const QString &msg, const QVariantMap &relevantEmotes);
@@ -126,7 +128,8 @@ public slots:
     void login();
 
     void bulkDownloadEmotes(QList<QString> keys);
-
+    void downloadBttvEmotesGlobal();
+    void downloadBttvEmotesChannel();
 private slots:
     void receive();
     void processError(QAbstractSocket::SocketError socketError);
