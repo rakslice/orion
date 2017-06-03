@@ -47,6 +47,7 @@ inline void noisyFailureMsgHandler(QtMsgType /*type*/, const QMessageLogContext 
 int main(int argc, char *argv[])
 {
     CustomApp app(argc, argv);
+    app.setApplicationVersion(APP_VERSION);
 
     //Single application solution
     RunGuard guard("wz0dPKqHv3vX0BBsUFZt");
