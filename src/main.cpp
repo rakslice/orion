@@ -47,6 +47,7 @@ inline void noisyFailureMsgHandler(QtMsgType /*type*/, const QMessageLogContext 
 int main(int argc, char *argv[])
 {
     CustomApp app(argc, argv);
+    app.setApplicationVersion(APP_VERSION);
 
     /*
     //Single application solution
@@ -56,6 +57,19 @@ int main(int argc, char *argv[])
         return -1;
     }
     */
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Desktop client for Twitch.tv");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption debugOption(QStringList() << "d" << "debug", "show debug output");
+
+    parser.addOption(debugOption);
+
+    parser.process(app);
+
+    bool showDebugOutput = parser.isSet(debugOption);
 
     //Init engine
     QQmlApplicationEngine engine;
@@ -69,7 +83,9 @@ int main(int argc, char *argv[])
         app.setFont(QFont(":/fonts/NotoSans-Regular.ttf", 10, QFont::Normal, false));
 
 #ifndef  QT_DEBUG
-    qInstallMessageHandler(noisyFailureMsgHandler);
+    if (!showDebugOutput) {
+        qInstallMessageHandler(noisyFailureMsgHandler);
+    }
 #endif
     app.setWindowIcon(appIcon);
 
