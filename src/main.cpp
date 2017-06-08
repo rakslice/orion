@@ -71,19 +71,6 @@ int main(int argc, char *argv[])
 
     bool showDebugOutput = parser.isSet(debugOption);
 
-    QCommandLineParser parser;
-    parser.setApplicationDescription("Desktop client for Twitch.tv");
-    parser.addHelpOption();
-    parser.addVersionOption();
-
-    QCommandLineOption debugOption(QStringList() << "d" << "debug", "show debug output");
-
-    parser.addOption(debugOption);
-
-    parser.process(app);
-
-    bool showDebugOutput = parser.isSet(debugOption);
-
     //Init engine
     QQmlApplicationEngine engine;
 
