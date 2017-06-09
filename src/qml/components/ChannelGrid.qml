@@ -31,8 +31,6 @@ CommonGrid {
     onItemRightClicked: {
         _menu.item = clickedItem
 
-        _watchLive.enabled = _menu.item.online
-
         _fav.text = (!allFavourites && !_menu.item.favourite) ? "Follow" : "Unfollow"
         _menu.state = (!allFavourites && !_menu.item.favourite) ? 1 : 2
 
@@ -77,12 +75,10 @@ CommonGrid {
 
         MenuItem {
             id: _watchLive
-            text: "Watch live"
+            text: _menu.item.online? "Watch live" : "Force watch live"
             //text: "Watch;play"
             onTriggered: {
-                if (_menu.item.online){
-                    playerView.getStreams(_menu.item)
-                }
+                playerView.getStreams(_menu.item)
             }
         }
 
