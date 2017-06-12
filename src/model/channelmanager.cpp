@@ -426,7 +426,7 @@ void ChannelManager::load(){
         const QString vod = settings.value("vod").toString();
         const quint64 lastPosition = settings.value("position").toULongLong();
 
-        setVodLastPlaybackPosition(channel, vod, lastPosition);
+        vodLastPlaybackPositionLoaded(channel, vod, lastPosition, i);
     }
     settings.endArray();
 
@@ -484,16 +484,24 @@ void ChannelManager::save()
     settings.endArray();
 
     //Write last positions
+    int nextLastPositionEntry = settings.beginReadArray("lastPositions");
+    settings.endArray();
+
     settings.beginWriteArray("lastPositions");
-    int channelEntryNum = 0;
-    for (auto channelEntry = channelVodLastPositions.constBegin(); channelEntry != channelVodLastPositions.constEnd(); channelEntry++) {
-        const auto & vods = channelEntry.value();
-        for (auto vodEntry = vods.constBegin(); vodEntry != vods.constEnd(); vodEntry++) {
-            settings.setArrayIndex(channelEntryNum);
-            settings.setValue("channel", channelEntry.key());
-            settings.setValue("vod", vodEntry.key());
-            settings.setValue("position", vodEntry.value());
-            channelEntryNum++;
+    for (auto channelEntry = channelVodLastPositions.begin(); channelEntry != channelVodLastPositions.end(); channelEntry++) {
+        auto & vods = channelEntry.value();
+        for (auto vodEntry = vods.begin(); vodEntry != vods.end(); vodEntry++) {
+            auto & lastPosition = vodEntry.value();
+            if (lastPosition.modified) {
+                if (lastPosition.settingsIndex == -1) {
+                    lastPosition.settingsIndex = nextLastPositionEntry++;
+                }
+
+                settings.setArrayIndex(lastPosition.settingsIndex);
+                settings.setValue("channel", channelEntry.key());
+                settings.setValue("vod", vodEntry.key());
+                settings.setValue("position", vodEntry.value().lastPosition);
+            }
         }
     }
     settings.endArray();
@@ -502,14 +510,31 @@ void ChannelManager::save()
 void ChannelManager::setVodLastPlaybackPosition(const QString & channel, const QString & vod, quint64 position) {
     auto channelEntry = channelVodLastPositions.find(channel);
     if (channelEntry == channelVodLastPositions.end()) {
-        channelEntry = channelVodLastPositions.insert(channel, QMap<QString, quint64>());
+        channelEntry = channelVodLastPositions.insert(channel, QMap<QString, LastPosition>());
+    }
+
+    auto & vodMap = channelEntry.value();
+    auto vodEntry = vodMap.find(vod);
+    if (vodEntry != vodMap.end()) {
+        vodEntry.value().lastPosition = position;
+        vodEntry.value().modified = true;
+    }
+    else {
+        vodMap.insert(vod, {position, true, -1});
+    }
+
+    emit vodLastPositionUpdated(channel, vod, position);
+}
+
+void ChannelManager::vodLastPlaybackPositionLoaded(const QString & channel, const QString & vod, quint64 position, int settingsIndex) {
+    auto channelEntry = channelVodLastPositions.find(channel);
+    if (channelEntry == channelVodLastPositions.end()) {
+        channelEntry = channelVodLastPositions.insert(channel, QMap<QString, LastPosition>());
     }
 
     auto & vodMap = channelEntry.value();
     vodMap.remove(vod);
-    vodMap.insert(vod, position);
-
-    emit vodLastPositionUpdated(channel, vod, position);
+    vodMap.insert(vod, {position, false, settingsIndex});
 }
 
 QVariant ChannelManager::getVodLastPlaybackPosition(const QString & channel, const QString & vod) {
@@ -524,7 +549,7 @@ QVariant ChannelManager::getVodLastPlaybackPosition(const QString & channel, con
         return QVariant();
     }
 
-    return vodEntry.value();
+    return vodEntry.value().lastPosition;
 }
 
 QVariantMap ChannelManager::getChannelVodsLastPlaybackPositions(const QString & channel) {
@@ -533,7 +558,7 @@ QVariantMap ChannelManager::getChannelVodsLastPlaybackPositions(const QString & 
     if (channelEntry != channelVodLastPositions.end()) {
         auto & vodMap = channelEntry.value();
         for (auto vodEntry = vodMap.constBegin(); vodEntry != vodMap.constEnd(); vodEntry++) {
-            out.insert(vodEntry.key(), vodEntry.value());
+            out.insert(vodEntry.key(), vodEntry.value().lastPosition);
         }
     }
     return out;
