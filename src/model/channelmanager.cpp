@@ -520,6 +520,7 @@ void ChannelManager::setVodLastPlaybackPosition(const QString & channel, const Q
         vodEntry.value().modified = true;
     }
     else {
+        // -1 index to be replaced at settings save time
         vodMap.insert(vod, {position, true, -1});
     }
 
