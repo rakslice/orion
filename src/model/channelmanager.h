@@ -31,6 +31,12 @@
 
 class ChannelManager;
 
+struct LastPosition {
+    quint64 lastPosition;
+    bool modified;
+    int settingsIndex;
+};
+
 class BadgeImageProvider : public ImageProvider {
     Q_OBJECT
 public:
@@ -126,7 +132,9 @@ protected:
     static const quint32 BLOCKED_USER_LIST_FETCH_LIMIT;
     void getBlockedUserList();
 
-    QMap<QString, QMap<QString, quint64>> channelVodLastPositions;
+    QMap<QString, QMap<QString, LastPosition>> channelVodLastPositions;
+
+    void vodLastPlaybackPositionLoaded(const QString & channel, const QString & vod, quint64 position, int settingsIndex);
 
 public:
     ChannelManager(NetworkManager *netman, bool hiDpi);
