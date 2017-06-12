@@ -191,6 +191,7 @@ public:
 
     Q_INVOKABLE void setVodLastPlaybackPosition(const QString & channel, const QString & vod, quint64 position);
     Q_INVOKABLE QVariant getVodLastPlaybackPosition(const QString & channel, const QString & vod);
+    Q_INVOKABLE QVariantMap getChannelVodsLastPlaybackPositions(const QString & channel);
 
     void setSwapChat(bool value);
     bool getSwapChat();
@@ -310,6 +311,8 @@ signals:
 
     void userBlocked(const QString & blockedUsername);
     void userUnblocked(const QString & unblockedUsername);
+
+    void vodLastPositionUpdated(const QString & channel, const QString & vod, const quint64 position);
 
 public slots:
     void checkFavourites();

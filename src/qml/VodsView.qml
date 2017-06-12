@@ -18,9 +18,12 @@ import "components"
 import "util.js" as Util
 
 Item{
+    id: vodsView
+
     anchors.fill: parent
     property variant selectedChannel
     property int itemCount: 0
+    property var channelVodPositions
 
     function search(channel){
 
@@ -41,6 +44,8 @@ Item{
 
         header.text = "Videos for " + selectedChannel.title;
 
+        channelVodPositions = g_cman.getChannelVodsLastPlaybackPositions(channel.name);
+
         g_vodmgr.search(selectedChannel._id, 0, 35)
 
         itemCount = 35
@@ -58,6 +63,18 @@ Item{
         if (visible) {
             vods.positionViewAtBeginning()
             vods.checkScroll()
+        }
+    }
+
+    Connections {
+        target: g_cman
+        onVodLastPositionUpdated: {
+            //console.log("onVodLastPositionUpdated", channel, vod, position);
+            if (selectedChannel.name == channel) {
+                channelVodPositions[vod] = position;
+                // need binding to update
+                channelVodPositions = channelVodPositions;
+            }
         }
     }
 
@@ -80,6 +97,7 @@ Item{
             views: model.views
             preview: model.preview
             duration: model.duration
+            position: channelVodPositions[model.id] || 0
             game: model.game
             createdAt: model.createdAt
         }

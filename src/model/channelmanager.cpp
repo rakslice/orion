@@ -508,6 +508,8 @@ void ChannelManager::setVodLastPlaybackPosition(const QString & channel, const Q
     auto & vodMap = channelEntry.value();
     vodMap.remove(vod);
     vodMap.insert(vod, position);
+
+    emit vodLastPositionUpdated(channel, vod, position);
 }
 
 QVariant ChannelManager::getVodLastPlaybackPosition(const QString & channel, const QString & vod) {
@@ -523,6 +525,18 @@ QVariant ChannelManager::getVodLastPlaybackPosition(const QString & channel, con
     }
 
     return vodEntry.value();
+}
+
+QVariantMap ChannelManager::getChannelVodsLastPlaybackPositions(const QString & channel) {
+    QVariantMap out;
+    auto channelEntry = channelVodLastPositions.find(channel);
+    if (channelEntry != channelVodLastPositions.end()) {
+        auto & vodMap = channelEntry.value();
+        for (auto vodEntry = vodMap.constBegin(); vodEntry != vodMap.constEnd(); vodEntry++) {
+            out.insert(vodEntry.key(), vodEntry.value());
+        }
+    }
+    return out;
 }
 
 void ChannelManager::addToFavourites(const quint32 &id){
