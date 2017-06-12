@@ -30,6 +30,7 @@ Item {
     property bool isVod: false
     property bool streamOnline: true
     property string curVodId
+    property int lastSetPosition
 
     property bool cursorHidden: false
     property string currentQualityName
@@ -187,6 +188,7 @@ Item {
                 g_vodmgr.getBroadcasts(vod._id)
                 isVod = true
                 root.curVodId = vod._id
+                root.lastSetPosition = startPos
 
                 duration = vod.duration
 
@@ -308,11 +310,15 @@ Item {
         }
 
         onPositionChanged: {
-            chatview.playerPositionUpdate(renderer.position);
+            var newPos = renderer.position;
+            chatview.playerPositionUpdate(newPos);
             if (root.isVod) {
-                g_cman.setVodLastPlaybackPosition(root.currentChannel.name, root.curVodId, renderer.position);
+                if (Math.abs(newPos - root.lastSetPosition) > 10) {
+                    root.lastSetPosition = newPos;
+                    g_cman.setVodLastPlaybackPosition(root.currentChannel.name, root.curVodId, newPos);
+                }
             }
-            seekBar.setPosition(renderer.position, duration);
+            seekBar.setPosition(newPos, duration);
         }
 
         onPlayingResumed: {
