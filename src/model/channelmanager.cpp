@@ -419,6 +419,17 @@ void ChannelManager::load(){
     }
     settings.endArray();
 
+    int numLastPositions = settings.beginReadArray("lastPositions");
+    for (int i = 0; i < numLastPositions; i++) {
+        settings.setArrayIndex(i);
+        const QString channel = settings.value("channel").toString();
+        const QString vod = settings.value("vod").toString();
+        const quint64 lastPosition = settings.value("position").toULongLong();
+
+        setVodLastPlaybackPosition(channel, vod, lastPosition);
+    }
+    settings.endArray();
+
     if (settings.contains("access_token")) {
         setAccessToken(settings.value("access_token").toString());
     } else {
@@ -471,6 +482,47 @@ void ChannelManager::save()
         favouritesModel->getChannels().at(i)->writeToSettings(settings);
     }
     settings.endArray();
+
+    //Write last positions
+    settings.beginWriteArray("lastPositions");
+    int channelEntryNum = 0;
+    for (auto channelEntry = channelVodLastPositions.constBegin(); channelEntry != channelVodLastPositions.constEnd(); channelEntry++) {
+        const auto & vods = channelEntry.value();
+        for (auto vodEntry = vods.constBegin(); vodEntry != vods.constEnd(); vodEntry++) {
+            settings.setArrayIndex(channelEntryNum);
+            settings.setValue("channel", channelEntry.key());
+            settings.setValue("vod", vodEntry.key());
+            settings.setValue("position", vodEntry.value());
+            channelEntryNum++;
+        }
+    }
+    settings.endArray();
+}
+
+void ChannelManager::setVodLastPlaybackPosition(const QString & channel, const QString & vod, quint64 position) {
+    auto channelEntry = channelVodLastPositions.find(channel);
+    if (channelEntry == channelVodLastPositions.end()) {
+        channelEntry = channelVodLastPositions.insert(channel, QMap<QString, quint64>());
+    }
+
+    auto & vodMap = channelEntry.value();
+    vodMap.remove(vod);
+    vodMap.insert(vod, position);
+}
+
+QVariant ChannelManager::getVodLastPlaybackPosition(const QString & channel, const QString & vod) {
+    auto channelEntry = channelVodLastPositions.find(channel);
+    if (channelEntry == channelVodLastPositions.end()) {
+        return QVariant();
+    }
+    
+    auto & vodMap = channelEntry.value();
+    auto vodEntry = vodMap.find(vod);
+    if (vodEntry == vodMap.end()) {
+        return QVariant();
+    }
+
+    return vodEntry.value();
 }
 
 void ChannelManager::addToFavourites(const quint32 &id){

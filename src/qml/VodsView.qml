@@ -85,12 +85,28 @@ Item{
         }
 
         onItemClicked: {
-            playerView.getStreams(selectedChannel, clickedItem)
+            var lastPlaybackPosition = vods.getLastPlaybackPosition(selectedChannel, clickedItem);
+            playerView.getStreams(selectedChannel, clickedItem, lastPlaybackPosition == null? 0 : lastPlaybackPosition);
+        }
+
+        function getLastPlaybackPosition(channel, vod) {
+            console.log("getLastPlaybackPosition", channel.name, vod._id);
+            return g_cman.getVodLastPlaybackPosition(channel.name, vod._id);
         }
 
         onItemRightClicked: {
             _menu.item = clickedItem
-            _menu.popup()
+
+            var lastPlayed = getLastPlaybackPosition(selectedChannel, clickedItem);
+            var haveLastPlayTime = lastPlayed != null;
+            _furthestPlayedMenuItem.enabled = haveLastPlayTime;
+            if (haveLastPlayTime) {
+               _furthestPlayedMenuItem.text = "Watch video from " + Util.getTime(lastPlayed);
+            } else {
+               _furthestPlayedMenuItem.text = "Watch video from furthest played";
+            }
+
+            _menu.popup();
         }
 
         onItemTooltipHover: {
@@ -114,10 +130,17 @@ Item{
         ContextMenu {
             id: _menu
             MenuItem {
-                text: "Watch video"
+                text: "Watch video from start"
                 //text: "Watch;play"
                 onTriggered: {
-                    playerView.getStreams(selectedChannel, _menu.item)
+                    playerView.getStreams(selectedChannel, _menu.item, 0)
+                }
+            }
+
+            MenuItem {
+                id: _furthestPlayedMenuItem
+                onTriggered: {
+                    playerView.getStreams(selectedChannel, _menu.item, vods.getLastPlaybackPosition(selectedChannel, _menu.item))
                 }
             }
         }

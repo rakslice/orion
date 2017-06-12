@@ -29,6 +29,7 @@ Item {
     property var streamMap
     property bool isVod: false
     property bool streamOnline: true
+    property string curVodId
 
     property bool cursorHidden: false
     property string currentQualityName
@@ -156,18 +157,18 @@ Item {
         g_cman.setQuality(streamName);
     }
 
-    function getStreams(channel, vod){
-        getChannel(channel, vod, true);
+    function getStreams(channel, vod, startPos){
+        getChannel(channel, vod, true, startPos);
     }
 
     function getChat(channel) {
-        getChannel(channel, null, false);
+        getChannel(channel, null, false, 0);
         if (chatview.status == 0) {
             chatview.status++;
         }
     }
 
-    function getChannel(channel, vod, wantVideo){
+    function getChannel(channel, vod, wantVideo, startPos){
 
         if (!channel){
             return
@@ -185,12 +186,13 @@ Item {
             else {
                 g_vodmgr.getBroadcasts(vod._id)
                 isVod = true
+                root.curVodId = vod._id
 
                 duration = vod.duration
 
                 console.log("Setting up VOD, duration " + vod.duration)
 
-                seekBar.setPosition(0, duration)
+                seekBar.setPosition(startPos, duration)
             }
         } else {
             isVod = false;
@@ -222,7 +224,7 @@ Item {
             } else {
                 var vodIdNum = parseInt(vod._id.substring(1));
                 console.log("replaying chat for vod", vodIdNum, "starting at", startEpochTime);
-                chatview.replayChat(currentChannel.name, currentChannel._id, vodIdNum, startEpochTime);
+                chatview.replayChat(currentChannel.name, currentChannel._id, vodIdNum, startEpochTime, startPos);
             }
         } else {
             chatview.joinChannel(currentChannel.name, currentChannel._id);
@@ -307,7 +309,10 @@ Item {
 
         onPositionChanged: {
             chatview.playerPositionUpdate(renderer.position);
-            seekBar.setPosition(renderer.position, duration)
+            if (root.isVod) {
+                g_cman.setVodLastPlaybackPosition(root.currentChannel.name, root.curVodId, renderer.position);
+            }
+            seekBar.setPosition(renderer.position, duration);
         }
 
         onPlayingResumed: {
