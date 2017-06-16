@@ -75,7 +75,7 @@ CommonGrid {
 
         MenuItem {
             id: _watchLive
-            text: _menu.item.online? "Watch live" : "Force watch live"
+            text: "Watch live"
             //text: "Watch;play"
             onTriggered: {
                 playerView.getStreams(_menu.item)
