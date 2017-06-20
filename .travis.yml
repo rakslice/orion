@@ -20,14 +20,16 @@ before_install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/Cellar/qt/$QTVER/bin/qmake orion.pro CONFIG+=multimedia; fi
   - make
+  - if [ -d orion.app ]; rm -rf orion.app; fi
   - bash distfiles/deploy_mac.sh
-  - if [ -n "TRAVIS_TAG" ]; then zip -vr orion.app.zip orion.app/; fi
+  - mkdir -p artifacts
+  - zip -vr artifacts/orion.app.zip orion.app/
   
 deploy:
   - provider: releases
     # To use this, create a Github token with the "public_repo" permission, and create an env var GITHUB_API_KEY in the Travis' project settings' environment, making sure "Display value in build log" is set to OFF
     api_key: '$GITHUB_API_KEY'
-    file: 'orion.app.zip'
+    file: 'artifacts/orion.app.zip'
     skip_cleanup: true
     on:
       tags: true
@@ -48,7 +50,7 @@ deploy:
     #         }
     #     ]
     # }	
-    file: 'orion.app.zip'
+    local_dir: artifacts
     skip_cleanup: true
     on:
       all_branches: true
