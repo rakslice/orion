@@ -9,7 +9,7 @@ QTDIR=/usr/local/Cellar/qt/$QTVER
 $QTDIR/bin/macdeployqt orion.app -qmldir=./src/qml
 
 # qml libs 
-mkdir orion.app/Contents/Resources/qml
+mkdir -p orion.app/Contents/Resources/qml
 #cp -r $QTDIR/qml/Enginio orion.app/Contents/Resources/qml
 cp -r $QTDIR/qml/Qt orion.app/Contents/Resources/qml
 cp -r $QTDIR/qml/QtQml orion.app/Contents/Resources/qml
