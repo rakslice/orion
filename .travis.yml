@@ -18,10 +18,8 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
 
 script:
-  - set QMAKE=qmake
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then set QMAKE=/usr/local/Cellar/qt/$QTVER/bin/qmake; fi
   - cd src
-  - $QMAKE orion.pro
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/Cellar/qt/$QTVER/bin/qmake orion.pro; fi
   - make
   - cd ..
   - bash distfiles/deploy_mac.sh
