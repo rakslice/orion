@@ -24,10 +24,32 @@ script:
   - if [ -n "TRAVIS_TAG" ]; then zip -vr orion.app.zip orion.app/; fi
   
 deploy:
-  provider: releases
-  # To use this, create a Github token with the "public_repo" permission, and create an env var GITHUB_API_KEY in the Travis' project settings' environment, making sure "Display value in build log" is set to OFF
-  api_key: '$GITHUB_API_KEY'
-  file: 'orion.app.zip'
-  skip_cleanup: true
-  on:
-    tags
+  - provider: releases
+    # To use this, create a Github token with the "public_repo" permission, and create an env var GITHUB_API_KEY in the Travis' project settings' environment, making sure "Display value in build log" is set to OFF
+    api_key: '$GITHUB_API_KEY'
+    file: 'orion.app.zip'
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+  - provider: s3
+    access_key_id: "$AWS_ACCESS_KEY_ID"
+    secret_access_key: "$AWS_SECRET_ACCESS_KEY"
+    bucket: "$AWS_S3_BUCKET"
+    region: "$AWS_REGION"
+	
+# Example policy to allow writes to bucket
+# {
+    # "Version": "2012-10-17",
+    # "Statement": [
+        # {
+            # "Effect": "Allow",
+            # "Action": "s3:PutObject",
+            # "Resource": "arn:aws:s3:::rakslice-orion-builds/*"
+        # }
+    # ]
+# }	
+    file: 'orion.app.zip'
+    skip_cleanup: true
+    on:
+      all_branches: true
