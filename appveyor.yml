@@ -80,6 +80,7 @@ after_build:
   - copy /y %MPVDIR%\mpv-dev.7z .
   - del %configuration%\*.obj
   - del %configuration%\*.cpp
+  - del %configuration%\*.h
   - del %configuration%\*.res
   - if %configuration%==release copy "resources\orion-installer.iss" orion-installer.iss
   - if %configuration%==release "C:\Program Files (x86)\Inno Setup 5\iscc.exe" /F"orion-%APPVEYOR_REPO_COMMIT%-%platform%" "orion-installer.iss"
