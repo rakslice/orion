@@ -21,3 +21,12 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/Cellar/qt/$QTVER/bin/qmake orion.pro CONFIG+=multimedia; fi
   - make
   - bash distfiles/deploy_mac.sh
+  - if [ -n "TRAVIS_TAG" ]; then zip -vr orion.app.zip orion.app/; fi
+  
+deploy:
+  provider: releases
+  api_key: '$GITHUB_API_KEY'
+  file: 'orion.app.zip'
+  skip_cleanup: true
+  on:
+    tags
