@@ -1,3 +1,5 @@
+# For info about dev tool paths on Appveyor see https://www.appveyor.com/docs/build-environment/#pre-installed-software
+
 environment:
   matrix:
     - platform: x86
@@ -76,9 +78,12 @@ build_script:
 after_build:
   - 7z a orion_%configuration%_%platform%_snapshot.zip . -x!.git
   - copy /y %MPVDIR%\mpv-dev.7z .
+  - if %configuration%==release "C:\Program Files (x86)\Inno Setup 5\iscc.exe" /F"Orion-1.x-%platform%-%APPVEYOR_REPO_COMMIT%" "resources\orion-installer.iss"
 
 artifacts:
   - path: orion_$(configuration)_$(platform)_snapshot.zip
     name: orion windows $(configuration) $(platform) snapshot zip
   - path: mpv-dev.7z
     name: libmpv dev archive used for build
+  - path: Orion-1.x-$(platform)-$(APPVEYOR_REPO_COMMIT).exe
+    name: Windows installer
