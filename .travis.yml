@@ -2,7 +2,7 @@ os:
   - osx
   
 env:
-  - QTVER=5.9
+  - QTVER=5.9.0
   
 language: cpp
   
@@ -14,8 +14,10 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
 
 script:
+  - set QMAKE=qmake
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then set QMAKE=/usr/local/Cellar/qt/$QTVER/bin/qmake; fi
   - cd src
-  - qmake orion.pro
+  - $QMAKE orion.pro
   - make
   - cd ..
   - bash distfiles/deploy_mac.sh
