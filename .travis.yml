@@ -25,6 +25,7 @@ script:
   
 deploy:
   provider: releases
+  # To use this, create a Github token with the "public_repo" permission, and create an env var GITHUB_API_KEY in the Travis' project settings' environment, making sure "Display value in build log" is set to OFF
   api_key: '$GITHUB_API_KEY'
   file: 'orion.app.zip'
   skip_cleanup: true
