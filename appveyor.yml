@@ -89,5 +89,5 @@ artifacts:
     name: orion windows $(configuration) $(platform) snapshot zip
   - path: mpv-dev.7z
     name: libmpv dev archive used for build
-  - path: orion-$(APPVEYOR_REPO_COMMIT-$(platform).exe
+  - path: orion-$(APPVEYOR_REPO_COMMIT)-$(platform).exe
     name: Windows installer
