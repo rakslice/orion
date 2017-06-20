@@ -20,5 +20,4 @@ before_install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/Cellar/qt/$QTVER/bin/qmake orion.pro CONFIG+=multimedia; fi
   - make
-  - cd ..
   - bash distfiles/deploy_mac.sh
