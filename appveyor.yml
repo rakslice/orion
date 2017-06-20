@@ -78,7 +78,8 @@ build_script:
 after_build:
   - 7z a orion_%configuration%_%platform%_snapshot.zip . -x!.git
   - copy /y %MPVDIR%\mpv-dev.7z .
-  - if %configuration%==release "C:\Program Files (x86)\Inno Setup 5\iscc.exe" /F"Orion-1.x-%platform%-%APPVEYOR_REPO_COMMIT%" "resources\orion-installer.iss"
+  - if %configuration%==release copy "resources\orion-installer.iss" orion-installer.iss
+  - if %configuration%==release "C:\Program Files (x86)\Inno Setup 5\iscc.exe" /F"Orion-1.x-%platform%-%APPVEYOR_REPO_COMMIT%" "orion-installer.iss"
 
 artifacts:
   - path: orion_$(configuration)_$(platform)_snapshot.zip
