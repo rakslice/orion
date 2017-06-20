@@ -37,18 +37,17 @@ deploy:
     secret_access_key: "$AWS_SECRET_ACCESS_KEY"
     bucket: "$AWS_S3_BUCKET"
     region: "$AWS_REGION"
-	
-# Example policy to allow writes to bucket
-# {
-    # "Version": "2012-10-17",
-    # "Statement": [
-        # {
-            # "Effect": "Allow",
-            # "Action": "s3:PutObject",
-            # "Resource": "arn:aws:s3:::rakslice-orion-builds/*"
-        # }
-    # ]
-# }	
+    # Example policy to allow writes to bucket
+    # {
+    #     "Version": "2012-10-17",
+    #     "Statement": [
+    #         {
+    #             "Effect": "Allow",
+    #             "Action": "s3:PutObject",
+    #             "Resource": "arn:aws:s3:::rakslice-orion-builds/*"
+    #         }
+    #     ]
+    # }	
     file: 'orion.app.zip'
     skip_cleanup: true
     on:
