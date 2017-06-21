@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e -x
 
-QTVER=5.9.0
-
-QTDIR=/usr/local/Cellar/qt/$QTVER
-
 # macdeploy
 $QTDIR/bin/macdeployqt orion.app -qmldir=./src/qml
 
