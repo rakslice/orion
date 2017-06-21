@@ -18,10 +18,9 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt@$QTBREWVER jq; fi
 
 script:
-  - export QTDIR=$(brew info --json=v1 qt | jq 'map(.bottle.stable.cellar + "/" + .name + "/" + .installed[0].version)')
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $QTDIR/bin/qmake orion.pro CONFIG+=multimedia; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $(brew info --json=v1 qt | jq 'map(.bottle.stable.cellar + "/" + .name + "/" + .installed[0].version)')/bin/qmake orion.pro CONFIG+=multimedia; fi
   - make
-  - bash distfiles/deploy_mac.sh
+  - QTDIR=$(brew info --json=v1 qt | jq 'map(.bottle.stable.cellar + "/" + .name + "/" + .installed[0].version)') bash distfiles/deploy_mac.sh
   - mkdir -p artifacts
   - zip -vr artifacts/orion.app.zip orion.app/
   
