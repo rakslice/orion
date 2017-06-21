@@ -15,6 +15,10 @@ for FRAMEWORK in $FRAMEWORKS; do
 	install_name_tool -change @rpath/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
 	@executable_path/../Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
 	$DIR/Contents/MacOS/orion
+
+	install_name_tool -change $QTDIR/lib/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
+	@executable_path/../Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
+	$DIR/Contents/MacOS/orion
 done
 
 #QtQuick.2 dylib
@@ -27,6 +31,10 @@ for FRAMEWORK in $FRAMEWORKS; do
 	install_name_tool -change @rpath/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
 	@executable_path/../Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
 	$DIR/Contents/Resources/qml/QtQuick.2/libqtquick2plugin.dylib
+
+	install_name_tool -change $QTDIR/lib/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
+	@executable_path/../Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
+	$DIR/Contents/Resources/qml/QtQuick.2/libqtquick2plugin.dylib
 done
 
 #Multimedia libs
@@ -36,6 +44,10 @@ for FRAMEWORK in $FRAMEWORKS; do
 	$DIR/Contents/Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK
 
 	install_name_tool -change @rpath/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
+	@executable_path/../Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
+	$DIR/Contents/Resources/qml/QtMultimedia/libdeclarative_multimedia.dylib
+
+	install_name_tool -change $QTDIR/lib/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
 	@executable_path/../Frameworks/$FRAMEWORK.framework/Versions/5/$FRAMEWORK \
 	$DIR/Contents/Resources/qml/QtMultimedia/libdeclarative_multimedia.dylib
 done
