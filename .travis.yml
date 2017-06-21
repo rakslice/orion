@@ -19,7 +19,7 @@ before_install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export QTDIR=$(brew info --json=v1 qt | jq -r '.[0].bottle.stable.cellar + "/" + .[0].name + "/" + .[0].installed[0].version'); fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export ORIONCONFIG=multimedia; fi
-  - $QTDIR/bin/qmake orion.pro CONFIG+=$(ORIONCONFIG)
+  - $QTDIR/bin/qmake orion.pro CONFIG+=$ORIONCONFIG
   - make
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash distfiles/deploy_mac.sh; fi
   - mkdir -p artifacts
