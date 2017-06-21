@@ -23,7 +23,7 @@ script:
   - make
   - bash distfiles/deploy_mac.sh
   - mkdir -p artifacts
-  - zip -vr artifacts/orion.app.zip orion.app/
+  - zip -vr --symlinks artifacts/orion.app.zip orion.app/
   
 deploy:
   - provider: releases
