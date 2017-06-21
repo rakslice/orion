@@ -17,5 +17,5 @@ cp -r $QTDIR/qml/QtQuick orion.app/Contents/Resources/qml
 cp -r $QTDIR/qml/QtQuick.2 orion.app/Contents/Resources/qml
 #cp -r $QTDIR/qml/Communi orion.app/Contents/Resources/qml
 
-#sh fixlibs.sh orion.app
+sh fixlibs.sh orion.app
 
