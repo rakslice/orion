@@ -3,7 +3,7 @@ os:
   
 env:
   - QTVER=5.9.0
-  - QTBREWVER=5.9
+    QTBREWVER=5.9
   
 language: cpp
   
