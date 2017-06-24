@@ -7,7 +7,12 @@
   #error Platform undefined. Pass /DPlatform={x86|x64}
 #endif
 
-#define {#Platform} 1
+#if "x86" == Platform
+#elif "x64" == Platform
+#else
+  #error Unknown platform {#Platform}
+#endif
+
 #define AppVersion GetFileVersion("release\orion.exe")
 
 [Setup]
@@ -19,7 +24,7 @@ UninstallDisplayIcon={app}\orion.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=.
-#ifdef x64
+#if "x64" == Platform
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 #endif
