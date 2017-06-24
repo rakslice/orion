@@ -14,6 +14,10 @@ UninstallDisplayIcon={app}\orion.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=.
+#ifdef x64
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+#endif
 
 [Files]
 Source: "release\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs
