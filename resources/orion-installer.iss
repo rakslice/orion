@@ -3,6 +3,11 @@
 
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
+#ifndef Platform
+  #error Platform undefined. Pass /DPlatform={x86|x64}
+#endif
+
+#define {#Platform} 1
 #define AppVersion GetFileVersion("release\orion.exe")
 
 [Setup]
@@ -24,3 +29,6 @@ Source: "release\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\Orion"; Filename: "{app}\bin\orion.exe"
+
+[Run]
+Filename: "{app}\bin\vcredist_{#Platform}.exe"; Parameters: "/install /passive /norestart"
