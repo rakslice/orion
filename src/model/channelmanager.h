@@ -194,8 +194,8 @@ public:
 
     Q_INVOKABLE void cancelLastVodChatRequest();
     Q_INVOKABLE void resetVodChat();
-    Q_INVOKABLE void getVodStartTime(quint64 vodId);
     Q_INVOKABLE void getVodChatPiece(quint64 vodId, quint64 offset);
+    Q_INVOKABLE void getNextVodChatPiece(quint64 vodId, QString cursor);
 
     Q_INVOKABLE void setVodLastPlaybackPosition(const QString & channel, const QString & vod, quint64 position);
     Q_INVOKABLE QVariant getVodLastPlaybackPosition(const QString & channel, const QString & vod);
@@ -311,8 +311,7 @@ signals:
 
     void channelBttvEmotesLoaded(const QString channel, QMap<QString, QString> emotesByCode);
 
-    void vodStartGetOperationFinished(double);
-    void vodChatPieceGetOperationFinished(QList<ReplayChatMessage>);
+    void vodChatPieceGetOperationFinished(ReplayChatPiece);
 
     void chatterListLoaded(QVariantMap chatters);
     void blockedUsersLoaded(const QSet<QString> &);

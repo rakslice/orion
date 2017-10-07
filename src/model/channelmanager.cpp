@@ -192,7 +192,6 @@ ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netm
     connect(netman, &NetworkManager::getChannelBttvEmotesOperationFinished, this, &ChannelManager::innerChannelBttvEmotesLoaded);
 
     connect(netman, &NetworkManager::favouritesReplyFinished, this, &ChannelManager::addFollowedResults);
-    connect(netman, &NetworkManager::vodStartGetOperationFinished, this, &ChannelManager::vodStartGetOperationFinished);
     connect(netman, &NetworkManager::vodChatPieceGetOperationFinished, this, &ChannelManager::vodChatPieceGetOperationFinished);
     connect(netman, &NetworkManager::chatterListLoadOperationFinished, this, &ChannelManager::processChatterList);
 
@@ -991,12 +990,12 @@ void ChannelManager::loadChatterList(const QString channel) {
     netman->loadChatterList(channel);
 }
 
-void ChannelManager::getVodStartTime(quint64 vodId) {
-    netman->getVodStartTime(vodId);
-}
-
 void ChannelManager::getVodChatPiece(quint64 vodId, quint64 offset) {
     netman->getVodChatPiece(vodId, offset);
+}
+
+void ChannelManager::getNextVodChatPiece(quint64 vodId, QString cursor) {
+    netman->getNextVodChatPiece(vodId, cursor);
 }
 
 void ChannelManager::cancelLastVodChatRequest() {
