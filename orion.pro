@@ -17,7 +17,9 @@ SOURCES += src/main.cpp\
     src/model/channelmanager.cpp \
     src/model/channel.cpp \
     src/util/fileutils.cpp \
+    src/network/httpserver.cpp \
     src/network/networkmanager.cpp \
+    src/network/prefetchstream.cpp \
     src/model/game.cpp \
     src/util/jsonparser.cpp \
     src/model/channellistmodel.cpp \
@@ -38,6 +40,7 @@ HEADERS  += src/model/channel.h \
     src/model/channelmanager.h \
     src/util/fileutils.h \
     src/network/networkmanager.h \
+    src/network/prefetchstream.h \
     src/model/game.h \
     src/util/jsonparser.h \
     src/model/channellistmodel.h \

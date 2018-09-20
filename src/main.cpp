@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
     CustomApp app(argc, argv);
     app.setApplicationVersion(APP_VERSION);
 
-    /*
+
+    /*    
     //Single application solution
     RunGuard guard("wz0dPKqHv3vX0BBsUFZt");
     if ( !guard.tryToRun() ){
@@ -124,6 +125,7 @@ int main(int argc, char *argv[])
 
     //Http server used for auth
     HttpServer *httpserver = new HttpServer(&app);
+    httpserver->setNetworkAccessManager(engine.networkAccessManager());
     QObject::connect(httpserver, &HttpServer::codeReceived, cman, &ChannelManager::setAccessToken);
     //-------------------------------------------------------------------------------------------------------------------//
 
