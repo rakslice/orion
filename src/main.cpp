@@ -96,6 +96,8 @@ int main(int argc, char *argv[])
     QNetworkProxyFactory::setUseSystemConfiguration(true);
     NetworkManager::initialize(engine.networkAccessManager());
 
+    HttpServer::getInstance()->setNetworkAccessManager(engine.networkAccessManager());
+
 #ifndef Q_OS_ANDROID
     //Single application solution
     QLockFile lockfile(QDir::temp().absoluteFilePath("wz0dPKqHv3vX0BBsUFZt.lock"));

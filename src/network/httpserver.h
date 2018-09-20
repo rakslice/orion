@@ -6,8 +6,10 @@
 #include <QDataStream>
 #include <QMap>
 #include <QDebug>
+#include <QList>
 
 #include "../model/singletonprovider.h"
+#include "prefetchstream.h"
 
 class HttpServer: public QObject
 {
@@ -22,12 +24,18 @@ class HttpServer: public QObject
     static HttpServer *instance;
 
     explicit HttpServer(QObject *parent = 0);
+
+    QList<PrefetchStream *> prefetchStreams;
+
+    QNetworkAccessManager * networkAccessManager;
 public:
     static HttpServer *getInstance();
 
     Q_INVOKABLE QString port();
 
     bool isOk() const;
+
+    void setNetworkAccessManager(QNetworkAccessManager * networkAccessManager);
 
 public slots:
     // starts server
@@ -39,6 +47,9 @@ public slots:
     void onConnect();
 
     void onRead();
+
+private slots:
+    void prefetchStreamDied();
 
 signals:
     void codeReceived(QString code);

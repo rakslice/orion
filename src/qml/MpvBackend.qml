@@ -14,6 +14,7 @@
 
 import QtQuick 2.5
 import mpv 1.0
+import app.orion 1.0
 
 /* Interface for backend Mpv
 
@@ -42,11 +43,67 @@ volume              -- volume between 0 - 100
 Item {
     id: root
 
+    function getPrefetchUrls(data) {
+        var dataLines = data.split("\n");
+        var prefetchPrefix = "#EXT-X-TWITCH-PREFETCH:";
+        var prefetchUrls = [];
+        for (var i = 0; i < dataLines.length; i++) {
+            var line = dataLines[i];
+            if ((line.length >= prefetchPrefix.length) && (line.substring(0, prefetchPrefix.length) === prefetchPrefix)) {
+                var prefetchUrl = line.substring(prefetchPrefix.length);
+                // console.log("prefetch url", prefetchUrl);
+                prefetchUrls.push(prefetchUrl);
+            }
+        }
+        return prefetchUrls;
+    }
+
+    property bool lastUsedStreamService: false;
+
     function load(src, start, description) {
+        if (start >= 0) {
+            return loadInternal(src, start, description);
+        } else {
+            // first, directly fetch the m3u8 first to see if it contains a twitch ext info item
+            quickHttpGet(src, function(data) {
+                var prefetchUrls = getPrefetchUrls(data);
+
+                if (prefetchUrls.length === 0) {
+                    // Nope. Treat as ordinary m3u
+                    loadInternal(src, start, description, false);
+                } else {
+                    loadInternal("http://127.0.0.1:8979/prefetchstream/" + src, start, description, true);
+                }
+            });
+        }
+    }
+    function quickHttpGet(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = (function(myxhr) {
+            return function() {
+                if (myxhr.readyState === 4) {
+                    callback(myxhr.responseText);
+                }
+            }
+        })(xhr);
+        xhr.open('GET', url, true);
+        xhr.send('');
+    }
+
+    function loadInternal(src, start, description, needStreamService) {
         console.log("Loading src", src, start)
         status = "BUFFERING"
 
         stop();
+
+        if (needStreamService !== root.lastUsedStreamService) {
+            if (needStreamService) {
+                LoginService.start();
+            } else {
+                LoginService.stop();
+            }
+        }
+        root.lastUsedStreamService = needStreamService;
 
         if (start >= 0) {
             position = start

@@ -13,6 +13,10 @@ HttpServer *HttpServer::getInstance() {
     return instance;
 }
 
+void HttpServer::setNetworkAccessManager(QNetworkAccessManager * networkAccessManager) {
+    this->networkAccessManager = networkAccessManager;
+}
+
 QString HttpServer::port() {
     return m_port;
 }
@@ -43,6 +47,13 @@ void HttpServer::start() {
 }
 
 void HttpServer::stop() {
+    while (!prefetchStreams.empty()) {
+        PrefetchStream * stream = prefetchStreams.last();
+        prefetchStreams.pop_back();
+        stream->stop();
+        stream->deleteLater();
+    }
+
     if (server) {
         qDebug() << "Stopping server";
         server->deleteLater();
@@ -56,6 +67,16 @@ void HttpServer::onConnect() {
     connect(socket, &QTcpSocket::readyRead, this, &HttpServer::onRead);
 }
 
+static const QString PREFETCHSTREAM_PATH = "/prefetchstream/";
+
+
+void HttpServer::prefetchStreamDied() {
+    PrefetchStream* deadStream = qobject_cast<PrefetchStream *>(sender());
+    qDebug() << "prefetch stream died, deleting";
+    prefetchStreams.removeAll(deadStream);
+    deadStream->deleteLater();
+}
+
 void HttpServer::onRead() {
     qDebug() << "Reading request...";
     QTcpSocket *socket = (QTcpSocket*) this->sender();
@@ -67,6 +88,21 @@ void HttpServer::onRead() {
     if (tokens[0] == "GET") {
         if (tokens.length() >= 1) {
             QString params = tokens[1];
+
+            if (params.startsWith(PREFETCHSTREAM_PATH)) {
+                // for prefetch streams don't just delete the socket on disconnect
+                disconnect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+
+                QString prefetchStreamUrl = params.mid(PREFETCHSTREAM_PATH.length());
+
+                PrefetchStream * newPrefetchStream = new PrefetchStream(socket, prefetchStreamUrl, networkAccessManager, this);
+                prefetchStreams.append(newPrefetchStream);
+                connect(newPrefetchStream, &PrefetchStream::died, this, &HttpServer::prefetchStreamDied);
+                newPrefetchStream->start();
+                return;
+            }
+
+            qDebug() << "GET params" << params;
 
             //params to map
             QMap<QString,QString> map;
