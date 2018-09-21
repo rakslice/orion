@@ -48,6 +48,10 @@ Item {
         renderer.rendererInfoMessage.connect(chatview.showNoticeMessage)
     }
 
+    function debugNotice(text) {
+        //chatview.showNoticeMessage(text);
+    }
+
     //Animations, need to be declared BEFORE width, height binds
     Behavior on width {
         enabled: smallMode
@@ -102,6 +106,7 @@ Item {
         onNetworkAccessChanged: {
             if (up && currentChannel && !renderer.status !== "PAUSED") {
                 //console.log("Network up. Resuming playback...")
+                debugNotice("onNetworkAccessChanged loadAndPlaying");
                 loadAndPlay(currentQualityName)
             }
         }
@@ -111,6 +116,7 @@ Item {
             if (channelId === currentChannel._id) {
                 if (online && !root.streamOnline) {
                     console.log("Stream back online, resuming playback")
+                    debugNotice("streamGetOperationFinished loadAndPlaying");
                     loadAndPlay(currentQualityName)
                 }
                 root.streamOnline = online
@@ -145,6 +151,7 @@ Item {
 
 
     function loadAndPlay(streamName){
+        debugNotice("one loadAndPlay call");
         var description = setWatchingTitle();
 
         var start = !isVod ? -1 : seekBar.position
@@ -251,7 +258,13 @@ Item {
         return description;
     }
 
+    // We need a way to unhook the stream selector change event
+    // while it is being populated with loaded stream info
+    property bool loadAndPlayOnStreamSelectorChange: false;
+
     function loadStreams(streams) {
+        loadAndPlayOnStreamSelectorChange = false;
+        debugNotice("start of loadStreams");
 
         console.log("DEBUG STREAMS")
         var sourceNames = []
@@ -265,11 +278,18 @@ Item {
         sourcesBox.entries = sourceNames
 
         if (currentQualityName && streamMap[currentQualityName]) {
+            debugNotice("PlayerView before sourcesBox.selectItem");
             sourcesBox.selectItem(currentQualityName);
-            loadAndPlay(currentQualityName)
         } else {
             sourcesBox.selectFirst();
         }
+
+        debugNotice("PlayerView after sourcesBox item selected explicit loadAndPlaying");
+        loadAndPlay(currentQualityName)
+
+        loadAndPlayOnStreamSelectorChange = true;
+
+        debugNotice("end of loadStreams");
     }
 
     function seekTo(position) {
@@ -282,6 +302,7 @@ Item {
 
     function reloadStream() {
         renderer.stop()
+        debugNotice("reloadStream loadAndPlaying");
         loadAndPlay(currentQualityName)
     }
 
@@ -767,7 +788,12 @@ Item {
                 }
 
                 onItemChanged: {
-                    loadAndPlay(item)
+                    if (loadAndPlayOnStreamSelectorChange) {
+                        debugNotice("StreamSelectorComboBox onItemChanged loadAndPlaying");
+                        loadAndPlay(item);
+                    } else {
+                        debugNotice("StreamSelectorComboBox onItemChanged but loadAndPlaying flag is currently off");
+                    }
                 }
             }
         }
