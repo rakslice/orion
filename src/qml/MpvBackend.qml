@@ -96,6 +96,12 @@ Item {
         console.log("Loading src", src, start)
         stop();
 
+        if (needStreamService) {
+            rendererInfoMessage("Low latency stream")
+        } else {
+            rendererInfoMessage("High latency stream")
+        }
+
         if (needStreamService !== root.lastUsedStreamService) {
             if (needStreamService) {
                 httpServer.start();
