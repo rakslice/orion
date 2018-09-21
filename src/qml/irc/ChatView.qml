@@ -58,6 +58,10 @@ Item {
         }
     }
 
+    function showNoticeMessage(text) {
+        chat.outputNoticeMessage(text)
+    }
+
     function cleanupPrevChannel() {
         if (chat.lastBttvChannelEmotes != null) {
             _emoteButton.clearChannelSpecificEmotes()
