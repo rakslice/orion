@@ -62,7 +62,7 @@ Item {
 
     function load(src, start, description) {
         if (start >= 0) {
-            return loadInternal(src, start, description);
+            return loadInternal(src, start, description, false);
         } else {
             // first, directly fetch the m3u8 first to see if it contains a twitch ext info item
             quickHttpGet(src, function(data) {
