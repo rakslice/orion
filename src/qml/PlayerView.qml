@@ -45,6 +45,7 @@ Item {
         if (savedQuality) {
             currentQualityName = savedQuality;
         }
+        renderer.rendererInfoMessage.connect(chatview.showNoticeMessage)
     }
 
     //Animations, need to be declared BEFORE width, height binds

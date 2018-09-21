@@ -87,10 +87,12 @@ Item {
         volume = Math.round(vol)
     }
 
-    signal playingResumed()
-    signal playingPaused()
-    signal playingStopped()
-    signal volumeChangedInternally()
+    signal playingResumed();
+    signal playingPaused();
+    signal playingStopped();
+    signal volumeChangedInternally();
+    signal rendererInfoMessage(string text);
+
 
     property string status: "STOPPED"
     onStatusChanged: {

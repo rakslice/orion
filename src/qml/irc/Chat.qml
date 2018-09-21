@@ -76,6 +76,10 @@ Item {
         g_cman.loadChannelBttvEmotes(channelName);
     }
 
+    function outputNoticeMessage(text) {
+        messageReceived("notice", null, "", false, false, false, [], true, text, false);
+    }
+
     function joinChannel(channelName, channelId) {
         chat.join(channelName, channelId)
         enterChannelCommon(channelName, channelId);
@@ -83,14 +87,14 @@ Item {
             chat.replayStop();
         }
         root.replayMode = false;
-        messageReceived("notice", null, "", false, false, false, [], true, "Joined channel #" + channelName, false)
+        outputNoticeMessage("Joined channel #" + channelName);
     }
 
     function replayChat(channelName, channelId, vodId, startEpochTime, startPos) {
         chat.replay(channelName, channelId, vodId, startEpochTime, startPos)
         enterChannelCommon(channelName, channelId);
         root.replayMode = true
-        messageReceived("notice", null, "", false, false, false, [], true, "Starting chat replay #" + channelName + " v" + vodId, false)
+        outputNoticeMessage("Starting chat replay #" + channelName + " v" + vodId);
     }
 
     function durationStr(duration) {
@@ -105,7 +109,7 @@ Item {
     }
 
     function replaySeek(newOffset) {
-        messageReceived("notice", null, "", false, false, false, [], true, "Seeking to " + durationStr(newOffset), false);
+        outputNoticeMessage("Seeking to " + durationStr(newOffset))
         chat.replaySeek(newOffset);
     }
 
@@ -159,7 +163,7 @@ Item {
                 }
             } else {
                 if (!root.replayMode) {
-                    root.messageReceived("notice", null, "", false, false, false, [], true, "Left due to disconnect", false);
+                    root.outputNoticeMessage("Left due to disconnect")
                 }
                 console.log("Disconnected from chat")
             }
