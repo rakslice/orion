@@ -66,8 +66,10 @@ Item {
         if (start >= 0) {
             return loadInternal(src, start, description);
         } else {
+            //rendererInfoMessage("one quickHttpGet call");
             // first, directly fetch the m3u8 first to see if it contains a twitch ext info item
             quickHttpGet(src, function(data) {
+                //rendererInfoMessage("one quickHttpGet callback");
                 var prefetchUrls = getPrefetchUrls(data);
 
                 if (prefetchUrls.length === 0) {
