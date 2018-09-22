@@ -133,8 +133,9 @@ Window {
             newRootY -= root.height;
         }
 
-        if (offScreenBottom || offScreenRight)
+        if (offScreenBottom || offScreenRight) {
             //console.log("after adjustment tooltip window will be at ", newRootWidth, "x", newRootHeight, "+", newRootX, "+", newRootY);
+        }
 
         // ISSUE
         // It's tricky to actually get the tooltip window to move to a different screen -- its size seems to get be calculated
