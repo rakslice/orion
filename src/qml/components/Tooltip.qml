@@ -80,7 +80,7 @@ Window {
     }
 
     function display(mX, mY, parentWindow){
-        console.log("tooltip display(", mX, ",", mY, ")");
+        //console.log("tooltip display(", mX, ",", mY, ")");
         if (root.visible || g_contextMenuVisible){
             return;
         }
@@ -97,21 +97,21 @@ Window {
         var newRootWidth = root.dpWidth;
         var newRootHeight = root.dpHeight;
 
-        console.log("before adjustment tooltip window will be at ", newRootWidth, "x", newRootHeight, "+", newRootX, "+", newRootY);
+        //console.log("before adjustment tooltip window will be at ", newRootWidth, "x", newRootHeight, "+", newRootX, "+", newRootY);
 
         var windowRightEdge = newRootX + root.width;
         var offScreenRight = windowRightEdge > Screen.desktopAvailableWidth;
 
         if (screen.hasOwnProperty("virtualX")) {
             var screenRightEdge = screen.virtualX + screen.width;
-            console.log("screenRightEdge", screenRightEdge);
+            //console.log("screenRightEdge", screenRightEdge);
             if (windowRightEdge > screenRightEdge) {
                 offScreenRight = true;
             }
         }
 
         if (offScreenRight) {
-            console.log("Tooltip would be off the right, adjusting");
+            //console.log("Tooltip would be off the right, adjusting");
             // move to the left of the cursor
             newRootX -= root.width + 40;
         }
@@ -121,20 +121,20 @@ Window {
 
         if (screen.hasOwnProperty("virtualY")) {
             var screenBottomEdge = screen.virtualY + screen.height;
-            console.log("screenBottomEdge", screenBottomEdge);
+            //console.log("screenBottomEdge", screenBottomEdge);
             if (windowBottomEdge > screenBottomEdge) {
                 offScreenBottom = true;
             }
         }
 
         if (offScreenBottom) {
-            console.log("Tooltip would be off the bottom, adjusting");
+            //console.log("Tooltip would be off the bottom, adjusting");
             // move above the line of the cursor
             newRootY -= root.height;
         }
 
         if (offScreenBottom || offScreenRight)
-            console.log("after adjustment tooltip window will be at ", newRootWidth, "x", newRootHeight, "+", newRootX, "+", newRootY);
+            //console.log("after adjustment tooltip window will be at ", newRootWidth, "x", newRootHeight, "+", newRootX, "+", newRootY);
 
         // ISSUE
         // It's tricky to actually get the tooltip window to move to a different screen -- its size seems to get be calculated
@@ -145,15 +145,15 @@ Window {
         // - Position it, and then reposition it again after a pause
         // - Make it not cross a screen boundary
 
-        console.log("Screen name " + screen.name);
+        //console.log("Screen name " + screen.name);
         var screenChanged = (lastScreenName !== null) && (lastScreenName !== screen.name);
         lastScreenName = screen.name;
 
         if (screenChanged) {
             // While we move the window, make it 1x1 px so it doesn't cross a screen boundary
-            console.log("before minimal width");
+            //console.log("before minimal width");
             root.width = 1;
-            console.log("before minimal height");
+            //console.log("before minimal height");
             root.height = 1;
             // make it transparent
             //root.opacity = 0;
@@ -163,14 +163,14 @@ Window {
         }
 
         // now move it
-        console.log("setting Tooltip window coordinates; before x");
+        //console.log("setting Tooltip window coordinates; before x");
         root.x = newRootX;
-        console.log("before y");
+        //console.log("before y");
         root.y = newRootY;
 
-        console.log("before Tooltip window show()");
+        //console.log("before Tooltip window show()");
         root.show();
-        console.log("after Tooltip window show()");
+        //console.log("after Tooltip window show()");
 
         if (screenChanged) {
             secondSetX = newRootX;
@@ -191,7 +191,7 @@ Window {
         interval: 20
         repeat: false
         onTriggered: {
-            console.log("second set");
+            //console.log("second set");
             root.x = secondSetX;
             root.y = secondSetY;
             root.width = secondSetWidth;
