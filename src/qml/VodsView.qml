@@ -142,7 +142,7 @@ Item{
             g_tooltip.text += selectedItem.views + " views<br/>"
 
             g_tooltip.img = selectedItem.preview
-            g_tooltip.display(g_rootWindow.x + mX, g_rootWindow.y + mY)
+            g_tooltip.display(g_rootWindow.x + mX, g_rootWindow.y + mY, g_rootWindow)
         }
 
         ContextMenu {
