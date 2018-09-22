@@ -57,7 +57,19 @@ Rectangle {
     }
 
     function selectFirst() {
-        list.currentIndex = 0
+        if (entries.length >= 2 && findIndex("audio_only") === 0) {
+            list.currentIndex = 1;
+        } else {
+            list.currentIndex = 0;
+        }
+    }
+
+    function currentItemName() {
+        if (list.currentIndex >= entries.length) {
+            return null;
+        } else {
+            return entries[entries.length - 1 - list.currentIndex];
+        }
     }
 
     function selectItem(item) {
