@@ -28,6 +28,7 @@ Window {
 
     property string text
     property string img
+    property variant lastScreenName: null
 
     Rectangle {
         id: rootRect
@@ -144,13 +145,22 @@ Window {
         // - Position it, and then reposition it again after a pause
         // - Make it not cross a screen boundary
 
-        // While we move the window, make it 1x1 px so it doesn't cross a screen boundary
-        console.log("before minimal width");
-        root.width = 1;
-        console.log("before minimal height");
-        root.height = 1;
-        // make it transparent
-        //root.opacity = 0;
+        console.log("Screen name " + screen.name);
+        var screenChanged = (lastScreenName !== null) && (lastScreenName !== screen.name);
+        lastScreenName = screen.name;
+
+        if (screenChanged) {
+            // While we move the window, make it 1x1 px so it doesn't cross a screen boundary
+            console.log("before minimal width");
+            root.width = 1;
+            console.log("before minimal height");
+            root.height = 1;
+            // make it transparent
+            //root.opacity = 0;
+        } else {
+            root.width = newRootWidth;
+            root.height = newRootHeight;
+        }
 
         // now move it
         console.log("setting Tooltip window coordinates; before x");
@@ -162,11 +172,13 @@ Window {
         root.show();
         console.log("after Tooltip window show()");
 
-        secondSetX = newRootX;
-        secondSetY = newRootY;
-        secondSetWidth = newRootWidth;
-        secondSetHeight = newRootHeight;
-        secondSetTimer.start();
+        if (screenChanged) {
+            secondSetX = newRootX;
+            secondSetY = newRootY;
+            secondSetWidth = newRootWidth;
+            secondSetHeight = newRootHeight;
+            secondSetTimer.start();
+        }
     }
 
     property int secondSetX
