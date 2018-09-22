@@ -284,6 +284,8 @@ Item {
             sourcesBox.selectFirst();
         }
 
+        currentQualityName = sourcesBox.currentItemName();
+
         debugNotice("PlayerView after sourcesBox item selected explicit loadAndPlaying");
         loadAndPlay(currentQualityName)
 
