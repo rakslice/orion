@@ -56,16 +56,25 @@ void PrefetchStream::handlePlaylistResponse() {
 
     qDebug() << "playlist response";
 
-    if (reply->error() != QNetworkReply::NoError) {
+    bool firstRequest = reply->request().attribute(QNetworkRequest::User).toULongLong() == 1;
 
+    if (reply->error() != QNetworkReply::NoError) {
         qDebug() << "playlist request got HTTP error" << reply->error();
-        stop();
+        if (firstRequest) {
+            qDebug() << "giving not found error";
+            /* This isn't a realtime stream as far as we can tell; just return a 404 */
+            QString response = "HTTP/1.1 502 Bad Gateway\r\n";
+            response += "Content-Type: text/plain; charset=utf-8\r\n";
+            response += "Connection: Closed\r\n";
+            response += "\r\n";
+            response += "Proxy got upstream error '" + reply->errorString() + "'\r\n";
+            trySendData(response.toUtf8());
+        }
+        doneWithSocket();
         return;
     }
 
     QByteArray data = reply->readAll();
-
-    bool firstRequest = reply->request().attribute(QNetworkRequest::User).toULongLong() == 1;
 
     reply->deleteLater();
 
@@ -181,7 +190,7 @@ void PrefetchStream::handleFragmentPart() {
     if (reply->error() != QNetworkReply::NoError) {
 
         qDebug() << "fragment reply HTTP error" << reply->error();
-        stop();
+        doneWithSocket();
         return;
     }
 
