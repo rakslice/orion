@@ -6,7 +6,7 @@
 
 PrefetchStream::PrefetchStream(QTcpSocket * socket, QString streamUrl, QNetworkAccessManager *operation, QObject * parent) : QObject(parent),
             socket(socket), streamUrl(QUrl(streamUrl)), operation(operation),
-            alive(true), consecutiveEmptyPlaylists(0), readBlockSize(4096), currentFragmentBytesSoFar(0)
+            alive(true), consecutiveEmptyPlaylists(0), readBlockSize(4096), currentFragmentBytesSoFar(0), unsentDataSize(0)
 {
     nextPlaylistTimer.setInterval(1900);
     nextPlaylistTimer.setSingleShot(true);
@@ -18,7 +18,12 @@ PrefetchStream::~PrefetchStream() {
 }
 
 void PrefetchStream::start() {
+    connect(socket, &QTcpSocket::bytesWritten, this, &PrefetchStream::handleSocketBytesWritten);
     requestPlaylist(true);
+}
+
+void PrefetchStream::handleSocketBytesWritten(qint64 bytes) {
+    unsentDataSize -= bytes;
 }
 
 static QString shortUrl(QString url) {
@@ -123,7 +128,13 @@ void PrefetchStream::handlePlaylistResponse() {
         prefetchUrlsQueue.enqueue(fragment);
     }
 
-    if (!prefetchUrlsQueue.isEmpty()) {
+    qDebug() << "unsent bytes is at " << unsentDataSize;
+
+    if (unsentDataSize > 1048576) {
+        qDebug() << "socket is backed up, not fetching";
+        setupNextPlaylistTimer();
+    }
+    else if (!prefetchUrlsQueue.isEmpty()) {
         QString fragment = prefetchUrlsQueue.dequeue();
         qDebug() << "fetching next fragment" << shortUrl(fragment);
         requestAndSendFragment(fragment);
@@ -136,6 +147,7 @@ void PrefetchStream::handlePlaylistResponse() {
 
 void PrefetchStream::trySendData(const QByteArray & data) {
     if (alive) {
+        unsentDataSize += data.length();
         qint64 result = socket->write(data);
         if (result == -1) {
             qDebug() << "an error occurred while writing";

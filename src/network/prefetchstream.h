@@ -32,6 +32,7 @@ private:
     int consecutiveEmptyPlaylists;
     int readBlockSize;
     int currentFragmentBytesSoFar;
+    qint64 unsentDataSize;
 
     QTimer nextPlaylistTimer;
     QQueue<QString> prefetchUrlsQueue;
@@ -51,6 +52,7 @@ private slots:
     void handleFragmentError(QNetworkReply::NetworkError code);
     void handleFragmentFinished();
     void timeForNextPlaylist();
+    void handleSocketBytesWritten(qint64 bytes);
     void afterDeadPrefetchDisconnect();
 
 signals:
