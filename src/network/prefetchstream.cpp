@@ -21,6 +21,15 @@ void PrefetchStream::start() {
     requestPlaylist(true);
 }
 
+static QString shortUrl(QString url) {
+    if (url.length() > 72) {
+        return url.mid(0, 72) + "[...]";
+    }
+    else {
+        return url;
+    }
+}
+
 void PrefetchStream::requestPlaylist(bool first)
 {
     QNetworkRequest request;
@@ -104,19 +113,25 @@ void PrefetchStream::handlePlaylistResponse() {
     // process the next fragment we recognize the previous one, or else the first fragment
     int nextFragmenttoProcess = lastFragmentProcessedPos + 1;
 
-    if (nextFragmenttoProcess < fragments.length()) {
-        QString fragment = fragments.at(nextFragmenttoProcess);
+    for (int i = nextFragmenttoProcess; i < fragments.length(); i++) {
+        QString fragment = fragments.at(i);
 
         lastFragmentProcessed = fragment;
 
-        //qDebug() << "check pos " << nextFragmenttoProcess << " should be " << fragments.indexOf(lastFragmentProcessed);
+        qDebug() << "queued fragment" << shortUrl(fragment);
 
-        requestAndSendFragment(fragment);
-        return;
+        prefetchUrlsQueue.enqueue(fragment);
     }
 
-    // there was nothing to do, we'll need to set a timer so we check the playlist again 
-    setupNextPlaylistTimer();
+    if (!prefetchUrlsQueue.isEmpty()) {
+        QString fragment = prefetchUrlsQueue.dequeue();
+        qDebug() << "fetching next fragment" << shortUrl(fragment);
+        requestAndSendFragment(fragment);
+    }
+    else {
+        // there was nothing to do, we'll need to set a timer so we check the playlist again 
+        setupNextPlaylistTimer();
+    }
 }
 
 void PrefetchStream::trySendData(const QByteArray & data) {

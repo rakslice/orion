@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QUrl>
 #include <QNetworkReply>
+#include <QQueue>
 
 
 class QNetworkAccessManager;
@@ -33,6 +34,7 @@ private:
     int currentFragmentBytesSoFar;
 
     QTimer nextPlaylistTimer;
+    QQueue<QString> prefetchUrlsQueue;
 
     QStringList getPrefetchUrls(const QByteArray & data);
     void requestPlaylist(bool first);
