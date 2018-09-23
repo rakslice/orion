@@ -14,13 +14,7 @@ PrefetchStream::PrefetchStream(QTcpSocket * socket, QString streamUrl, QNetworkA
     connect(&nextPlaylistTimer, &QTimer::timeout, this, &PrefetchStream::timeForNextPlaylist);
 }
 
-// FIXME there is a multi-free bug related to the upstream socket or 
-// downstream network request around here somewhere
-// I've disabled a bunch of teardown, so that we leak memory and maybe handles but
-// we don't crash, for prototype purposes.
-
 PrefetchStream::~PrefetchStream() {
-    //stop();
 }
 
 void PrefetchStream::start() {
@@ -240,9 +234,10 @@ void PrefetchStream::doneWithSocket() {
     if (alive) {
         qDebug() << "prefetch stream client socket ending normally";
 
-        socket->waitForBytesWritten();
-        socket->disconnectFromHost();
         alive = false;
+        socket->waitForBytesWritten();
+        connect(socket, &QTcpSocket::disconnected, this, &PrefetchStream::afterDeadPrefetchDisconnect);
+        socket->disconnectFromHost();
 
         emit died();
     }
@@ -256,9 +251,15 @@ void PrefetchStream::stop() {
         alive = false;
 
         socket->close();
+        socket->deleteLater();
 
         emit died();
     }
+}
+
+void PrefetchStream::afterDeadPrefetchDisconnect() {
+    qDebug() << "after prefetch socket disconnect, deleting socket, alive " << alive;
+    socket->deleteLater();
 }
 
 

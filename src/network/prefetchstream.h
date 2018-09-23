@@ -49,6 +49,7 @@ private slots:
     void handleFragmentError(QNetworkReply::NetworkError code);
     void handleFragmentFinished();
     void timeForNextPlaylist();
+    void afterDeadPrefetchDisconnect();
 
 signals:
     void died();
