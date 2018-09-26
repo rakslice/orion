@@ -181,6 +181,26 @@ Page {
             }
 
             GroupBox {
+                title: "Stream options"
+                padding: 10
+                Layout.fillWidth: true
+                Layout.maximumWidth: 500
+                Layout.alignment: Qt.AlignCenter
+
+                Column {
+                    width: parent.width
+
+                    Switch {
+                        id: lowLatencyOption
+                        text: "Use low latency streams"
+                        checked: Settings.lowLatencyStreams
+                        onClicked: Settings.lowLatencyStreams = checked
+                    }
+                }
+
+            }
+
+            GroupBox {
                 title: "Twitch login"
                 padding: 10
                 Layout.fillWidth: true
