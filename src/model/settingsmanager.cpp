@@ -23,6 +23,7 @@ SettingsManager::SettingsManager(QObject *parent) :
     mLightTheme = false;
     mFont = "";
     mKeepOnTop = false;
+    mLowLatencyStreams = true;
 
     //Connections
     connect(HttpServer::getInstance(), &HttpServer::codeReceived, this, &SettingsManager::setAccessToken);
@@ -88,6 +89,10 @@ void SettingsManager::load()
 
     if (settings->contains("keepOnTop")) {
         setKeepOnTop(settings->value("keepOnTop").toBool());
+    }
+
+    if (settings->contains("lowLatencyStreams")) {
+        setLowLatencyStreams(settings->value("lowLatencyStreams").toBool());
     }
 }
 
@@ -350,4 +355,16 @@ void SettingsManager::setKeepOnTop(bool keepOnTop)
         settings->setValue("keepOnTop", keepOnTop);
     }
     emit keepOnTopChanged();
+}
+
+bool SettingsManager::lowLatencyStreams() {
+    return mLowLatencyStreams;
+}
+
+void SettingsManager::setLowLatencyStreams(bool value) {
+    if (mLowLatencyStreams != value) {
+        mLowLatencyStreams = value;
+        settings->setValue("lowLatencyStreams", mLowLatencyStreams);
+    }
+    emit lowLatencyStreamsChanged();
 }

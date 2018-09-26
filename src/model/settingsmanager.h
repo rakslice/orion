@@ -25,6 +25,7 @@ class SettingsManager : public QObject
     Q_PROPERTY(QString font READ font WRITE setFont NOTIFY fontChanged)
     Q_PROPERTY(bool versionCheckEnabled READ versionCheckEnabled)
     Q_PROPERTY(bool keepOnTop READ keepOnTop WRITE setKeepOnTop NOTIFY keepOnTopChanged)
+    Q_PROPERTY(bool lowLatencyStreams READ lowLatencyStreams WRITE setLowLatencyStreams NOTIFY lowLatencyStreamsChanged)
 
     bool mAlert;
     bool mCloseToTray;
@@ -42,6 +43,8 @@ class SettingsManager : public QObject
 
     bool mHiDpi;
     bool mKeepOnTop;
+
+    bool mLowLatencyStreams;
 
     explicit SettingsManager(QObject *parent = nullptr);
     static SettingsManager *instance;
@@ -90,6 +93,9 @@ public:
     bool keepOnTop() const;
     void setKeepOnTop(bool keepOnTop);
 
+    bool lowLatencyStreams();
+    void setLowLatencyStreams(bool value);
+
 signals:
     void alertChanged();
     void closeToTrayChanged();
@@ -104,6 +110,7 @@ signals:
     void accessTokenChanged(QString accessToken);
     void fontChanged();
     void keepOnTopChanged();
+    void lowLatencyStreamsChanged();
 
 public slots:
     void setAccessToken(const QString accessToken);

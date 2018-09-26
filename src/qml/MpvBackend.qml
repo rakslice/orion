@@ -61,7 +61,7 @@ Item {
     property bool lastUsedStreamService: false;
 
     function load(src, start, description) {
-        if (start >= 0) {
+        if (start >= 0 || !Settings.lowLatencyStreams) {
             return loadInternal(src, start, description, false);
         } else {
             // first, directly fetch the m3u8 first to see if it contains a twitch ext info item
