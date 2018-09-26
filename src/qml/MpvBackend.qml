@@ -63,7 +63,7 @@ Item {
     property bool lastUsedStreamService: false;
 
     function load(src, start, description) {
-        if (start >= 0) {
+        if (start >= 0 || !g_cman.lowLatencyStreams) {
             return loadInternal(src, start, description, false);
         } else {
             //rendererInfoMessage("one quickHttpGet call");

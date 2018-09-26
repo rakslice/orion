@@ -152,6 +152,8 @@ ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netm
     minimizeOnStartup = false;
     _textScaleFactor = 1.0;
 
+    lowLatencyStreams = true;
+
     resultsModel = new ChannelListModel();
 
     featuredModel = new ChannelListModel();
@@ -378,6 +380,14 @@ void ChannelManager::setQuality(const QString & value) {
     quality = value;
 }
 
+void ChannelManager::setLowLatencyStreams(bool value) {
+    lowLatencyStreams = value;
+}
+
+bool ChannelManager::getLowLatencyStreams() {
+    return lowLatencyStreams;
+}
+
 void ChannelManager::load(){
     QSettings settings("orion.application", "Orion");
 
@@ -399,6 +409,10 @@ void ChannelManager::load(){
 
     if (settings.contains("quality")) {
         quality = settings.value("quality").toString();
+    }
+
+    if (settings.contains("lowLatencyStreams")) {
+        lowLatencyStreams = settings.value("lowLatencyStreams").toBool();
     }
 
     int size = settings.beginReadArray("channels");
@@ -473,6 +487,7 @@ void ChannelManager::save()
     settings.setValue("notifications", offlineNotifications);
     settings.setValue("textScaleFactor", _textScaleFactor);
     settings.setValue("quality", quality);
+    settings.setValue("lowLatencyStreams", lowLatencyStreams);
 
     //Write channels
     settings.beginWriteArray("channels");

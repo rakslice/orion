@@ -74,6 +74,7 @@ class ChannelManager: public QObject
     Q_PROPERTY(bool swapChat READ getSwapChat WRITE setSwapChat NOTIFY swapChatChanged)
     Q_PROPERTY(double textScaleFactor READ getTextScaleFactor WRITE setTextScaleFactor NOTIFY textScaleFactorChanged)
     Q_PROPERTY(bool offlineNotifications READ getOfflineNotifications WRITE setOfflineNotifications NOTIFY notificationsChanged)
+    Q_PROPERTY(bool lowLatencyStreams READ getLowLatencyStreams WRITE setLowLatencyStreams NOTIFY lowLatencyStreamsChanged)
 
 protected:
     NetworkManager* netman;
@@ -100,6 +101,7 @@ protected:
     bool _swapChat;
     bool offlineNotifications;
     double _textScaleFactor;
+    bool lowLatencyStreams;
     QString quality;
 
     //Oauth
@@ -209,6 +211,9 @@ public:
     void setOfflineNotifications(bool value);
     bool getOfflineNotifications();
 
+    void setLowLatencyStreams(bool value);
+    bool getLowLatencyStreams();
+
     void editUserBlock(const QString & blockUserName, const bool isBlock);
     
     BadgeImageProvider * getBadgeImageProvider() {
@@ -298,6 +303,7 @@ signals:
     void swapChatChanged();
     void textScaleFactorChanged();
     void notificationsChanged();
+    void lowLatencyStreamsChanged();
 
     //oauth methods
     void accessTokenUpdated();
