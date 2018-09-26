@@ -36,6 +36,19 @@ Item{
         }
 
         OptionCheckbox {
+            id: lowLatencyStreamsOption
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+            checked: g_cman.lowLatencyStreams
+            onClicked: {
+                g_cman.lowLatencyStreams = !g_cman.lowLatencyStreams
+            }
+            text: "Use Low Latency Streams"
+        }
+
+        OptionCheckbox {
             id: alertOption
             anchors {
                 left: parent.left
