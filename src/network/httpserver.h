@@ -25,6 +25,7 @@ class HttpServer: public QObject
 public:
     explicit HttpServer(QObject *parent = 0);
     Q_INVOKABLE QString port();
+    Q_INVOKABLE bool isRunning() const;
 
     bool isOk() const;
 

@@ -18,6 +18,11 @@ bool HttpServer::isOk() const
     return !listenError;
 }
 
+bool HttpServer::isRunning() const
+{
+    return server && server->isListening();
+}
+
 void HttpServer::start() {
     if (server) {
         stop();

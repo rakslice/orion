@@ -60,8 +60,6 @@ Item {
         return prefetchUrls;
     }
 
-    property bool lastUsedStreamService: false;
-
     function load(src, start, description) {
         if (start >= 0 || !g_cman.lowLatencyStreams) {
             return loadInternal(src, start, description, false);
@@ -104,14 +102,13 @@ Item {
             rendererInfoMessage("High latency stream")
         }
 
-        if (needStreamService !== root.lastUsedStreamService) {
+        if (needStreamService !== httpServer.isRunning()) {
             if (needStreamService) {
                 httpServer.start();
             } else {
                 httpServer.stop();
             }
         }
-        root.lastUsedStreamService = needStreamService;
 
         if (start >= 0) {
             position = start
