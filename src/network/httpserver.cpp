@@ -30,7 +30,11 @@ void HttpServer::start() {
 
     connect(server, &QTcpServer::newConnection, this, &HttpServer::onConnect);
     if (!server->listen(QHostAddress::LocalHost, port)) {
+        listenError = true;
         emit error();
+    }
+    else {
+        listenError = false;
     }
 
     m_port = QString::number(port);
