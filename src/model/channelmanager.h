@@ -358,4 +358,16 @@ private slots:
     void innerUserUnblocked(quint64 myUserId, const QString & unblockedUsername);
 };
 
+
+class FavourtiteSortFilterProxyModel Q_DECL_FINAL : public QSortFilterProxyModel {
+    Q_OBJECT
+
+public:
+    FavourtiteSortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent) {
+    }
+
+protected:
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const Q_DECL_OVERRIDE;
+};
+
 #endif //CHANNEL_MANAGER_H

@@ -141,6 +141,24 @@ ChannelListModel *ChannelManager::createFollowedChannelsModel()
     return model;
 }
 
+bool FavourtiteSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    qint32 leftViewers = sourceModel()->data(left, ChannelListModel::Roles::ViewersRole).toInt();
+    qint32 rightViewers = sourceModel()->data(right, ChannelListModel::Roles::ViewersRole).toInt();
+    bool leftHasViewers = leftViewers > 0;
+    bool rightHasViewers = rightViewers > 0;
+
+    QString leftName = sourceModel()->data(left, ChannelListModel::Roles::NameRole).toString();
+    QString rightName = sourceModel()->data(right, ChannelListModel::Roles::NameRole).toString();
+
+    if (leftHasViewers == rightHasViewers) {
+        return rightName.compare(leftName, Qt::CaseSensitivity::CaseInsensitive) < 0;
+    } else {
+        return rightHasViewers;
+    }
+
+}
+
 ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netman), badgeImageProvider(this, hiDpi), bitsImageProvider(this, hiDpi) {
     user_id = 0;
     access_token = "";
@@ -161,9 +179,7 @@ ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netm
     //Setup followed channels model and it's signal chain
     favouritesModel = createFollowedChannelsModel();
 
-    favouritesProxy = new QSortFilterProxyModel();
-
-    favouritesProxy->setSortRole(ChannelListModel::Roles::ViewersRole);
+    favouritesProxy = new FavourtiteSortFilterProxyModel(this);
     favouritesProxy->sort(0, Qt::DescendingOrder);
     favouritesProxy->setSourceModel(favouritesModel);
     featuredProxy = new QSortFilterProxyModel();
