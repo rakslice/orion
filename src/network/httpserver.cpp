@@ -126,7 +126,6 @@ void HttpServer::onRead() {
 
     // Respond with 200
     QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
 
     // http payload message body
     QByteArray content;
@@ -148,9 +147,7 @@ void HttpServer::onRead() {
     response += "Content-Length: " + QString::number(content.length()) + "\n";
     response += "\n" + content;
 
-    out << response.toUtf8();
-
-    socket->write(block);
+    socket->write(response.toUtf8());
     socket->waitForBytesWritten();
     socket->disconnectFromHost();
 
