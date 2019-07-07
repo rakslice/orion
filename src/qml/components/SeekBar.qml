@@ -36,6 +36,24 @@ Item {
         time.updateTime()
     }
 
+    function seekForwardStep() {
+        // TODO: check if there are any conditions where we should be ignoring key input right now
+        console.log("forward seek step");
+        if (position < duration - 30) {
+            userChangedPosition(position + 30);
+        }
+    }
+
+    function seekBackStep() {
+        // TODO: check if there are any conditions where we should be ignoring key input right now
+        console.log("backward seek stop");
+        if (position > 30) {
+            userChangedPosition(position - 30);
+        } else {
+            userChangedPosition(0);
+        }
+    }
+
     onDurationChanged: {
         if (isVod)
             time.duration = Util.getTime(duration)

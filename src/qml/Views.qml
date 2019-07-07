@@ -24,6 +24,7 @@ Rectangle {
     signal requestSelectionChange(int index)
 
     color: Styles.bg
+    focus: true
 
     function setSelection(sel) {
         if (selection === 5 && playerView.isPlaying() && playerView.enableSmallMode)
