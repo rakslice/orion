@@ -149,6 +149,23 @@ Item {
         }
     }
 
+    Shortcut {
+        sequence: StandardKey.MoveToNextChar
+        context: Qt.WindowShortcut
+        onActivated: {
+            if (isVod)
+                seekBar.seekForwardStep();
+        }
+    }
+
+    Shortcut {
+        sequence: StandardKey.MoveToPreviousChar
+        context: Qt.WindowShortcut
+        onActivated: {
+            if (isVod)
+                seekBar.seekBackStep();
+        }
+    }
 
     function loadAndPlay(streamName){
         debugNotice("one loadAndPlay call");
