@@ -52,7 +52,10 @@ Item {
 
     onVisibleChanged: {
         if (visible) {
-            _input.forceActiveFocus()
+            console.log("ChatView.onVisibleChanged with visible, anon replay viewerlist", chat.isAnonymous, chat.replayMode, viewerList.enabled);
+            if (!chat.isAnonymous && !chat.replayMode && !viewerList.enabled) {
+                _input.forceActiveFocus()
+            }
         } else {
             _emotePicker.visible = false;
         }
@@ -466,6 +469,7 @@ Item {
 
         onVisibleChanged: {
             if (visible) {
+                console.log("ChatView: _emotePicker has become visible");
                 focusFilterInput();
                 height = dp(320);
             }
@@ -478,6 +482,7 @@ Item {
         }
 
         onCloseRequested: {
+            console.log("ChatView._emotePicker.onCloseRequested");
             startClosing();
             _input.focus = true;
         }
@@ -516,6 +521,7 @@ Item {
         }
 
         onMoveFocusDown: {
+            console.log("ChatView._emotePicker.onMoveFocusDown");
             _input.focus = true;
         }
     }

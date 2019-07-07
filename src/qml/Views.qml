@@ -53,36 +53,44 @@ Rectangle {
 
             //Featured
         case 1:
+            focus = true;
             featuredView.visible = true
             gradient.parent = featuredView
             break
 
             //Fav
         case 2:
+            focus = true;
             favouritesView.visible = true
             gradient.parent = favouritesView
             break
 
             //Games
         case 3:
+            // has a search box
             gamesView.visible = true
             gradient.parent = gamesView
             break
 
             //Vods
         case 4:
+            focus = true;
             vodsView.visible = true
             gradient.parent = vodsView
             break
 
             //Player
         case 5:
+            if (playerView.isVod) {
+                focus = true;
+            }
             playerView.visible = true
             playerView.smallMode = false
             break
 
             //Settings
         case 6:
+            focus = true;
             settingsView.visible = true
             break
         }
