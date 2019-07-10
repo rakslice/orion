@@ -65,7 +65,7 @@ Item {
     }
 
     function isUrl(str) {
-        var result = str.match(/^ ?(https?:\/\/)?([\da-z\.-]+)\.([a-z]{2,6})([\/\w \.-]*)*\/?$/);
+        var result = str.match(/^ ?(https?:\/\/)?([\da-z\.-]+)\.([a-z]{2,6})([\/\w \.-_\$+!*'(),=?&@#]*)*\/?$/);
         //console.log("isUrl", str, result);
         return result
     }
