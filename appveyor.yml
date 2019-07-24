@@ -16,6 +16,7 @@ install:
   - if %platform%==x86 set MPVLIBDIR=%MPVDIR%\32
   - if %platform%==x64 set MPVLIBDIR=%MPVDIR%\64
   - if not exist "%MPVDIR%" mkdir "%MPVDIR%"
+  - dir /s "%MPVDIR%"
   - ps: |
       if (!(Test-Path "${env:mpvdir}\mpv-dev.7z")) {
          # TLS 1.2 is required by the site
@@ -30,6 +31,7 @@ install:
       }
       Start-FileDownload "https://raw.githubusercontent.com/mpv-player/mpv/master/libmpv/mpv.def" -FileName "${env:mpvdir}\mpv_dl.def"
       @("EXPORTS") + (Get-Content "${env:mpvdir}\mpv_dl.def") | Set-Content "${env:mpvdir}\mpv.def"
+  - dir /s "%MPVDIR%"
   - type %MPVDIR%\version.txt
   - if %platform%==x86 set QTDIR=C:\Qt\5.9.7\msvc2015
   - if %platform%==x64 set QTDIR=C:\Qt\5.9.7\msvc2015_64
