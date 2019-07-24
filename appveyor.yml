@@ -21,16 +21,14 @@ install:
       if (!(Test-Path "${env:mpvdir}\mpv-dev.7z")) {
          # TLS 1.2 is required by the site
          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-         $libmpv_site_uri = [System.Uri]"https://mpv.srsfckn.biz/"
+         $libmpv_site_uri = [System.Uri]"https://sourceforge.net/projects/mpv-player-windows/files/libmpv/"
          $libmpv_downloads_page = Invoke-WebRequest $libmpv_site_uri
-         $libmpv_download_url_rel = $libmpv_downloads_page.AllElements | Where {$_.href -like "*/mpv-dev-*.7z"} | sort -Property href -Descending | select -First 1 -ExpandProperty href
+         $libmpv_download_url_rel = $libmpv_downloads_page.AllElements | Where {$_.href -like "*/mpv-dev-${env:mpv_platform}-*.7z/download"} | sort -Property href -Descending | select -First 1 -ExpandProperty href
          $libmpv_download_url = New-Object System.Uri -ArgumentList ($libmpv_site_uri, $libmpv_download_url_rel)
          echo "Downloading ${libmpv_download_url} to mpv-dev.7z"
          $libmpv_download_url | Out-File "${env:mpvdir}\version.txt"
          Start-FileDownload "${libmpv_download_url}" -FileName "${env:mpvdir}\mpv-dev.7z" 
       }
-      Start-FileDownload "https://raw.githubusercontent.com/mpv-player/mpv/master/libmpv/mpv.def" -FileName "${env:mpvdir}\mpv_dl.def"
-      @("EXPORTS") + (Get-Content "${env:mpvdir}\mpv_dl.def") | Set-Content "${env:mpvdir}\mpv.def"
   - dir /s "%MPVDIR%"
   - type %MPVDIR%\version.txt
   - if %platform%==x86 set QTDIR=C:\Qt\5.9.7\msvc2015
