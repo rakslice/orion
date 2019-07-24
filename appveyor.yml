@@ -31,8 +31,8 @@ install:
       Start-FileDownload "https://raw.githubusercontent.com/mpv-player/mpv/master/libmpv/mpv.def" -FileName "${env:mpvdir}\mpv_dl.def"
       @("EXPORTS") + (Get-Content "${env:mpvdir}\mpv_dl.def") | Set-Content "${env:mpvdir}\mpv.def"
   - type %MPVDIR%\version.txt
-  - if %platform%==x86 set QTDIR=C:\Qt\5.8\msvc2015
-  - if %platform%==x64 set QTDIR=C:\Qt\5.8\msvc2015_64
+  - if %platform%==x86 set QTDIR=C:\Qt\5.9.7\msvc2015
+  - if %platform%==x64 set QTDIR=C:\Qt\5.9.7\msvc2015_64
   - if %platform%==x86 set PATH=%QTDIR%\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin;%PATH%
   - if %platform%==x64 set PATH=%QTDIR%\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin;%PATH%
   - cd "%MPVDIR%"
