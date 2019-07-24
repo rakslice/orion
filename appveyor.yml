@@ -55,7 +55,7 @@ build_script:
 
     cd %APPVEYOR_BUILD_FOLDER%
 
-    qmake orion.pro
+    "%QTDIR%\bin\qmake" orion.pro
 
     mkdir libs
 
