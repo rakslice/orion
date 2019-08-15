@@ -32,7 +32,7 @@ QString BadgeImageProvider::getCanonicalKey(QString key) {
     const QString betaImageFormat = _hiDpi? "image_url_2x" : "image_url_1x";
     const QString officialImageFormat = "image";
 
-    int splitPos = key.indexOf("-");
+    int splitPos = key.lastIndexOf("-");
     if (splitPos != -1) {
         const QString badge = key.left(splitPos);
         const QString version = key.mid(splitPos + 1);
@@ -56,10 +56,67 @@ QString BadgeImageProvider::getCanonicalKey(QString key) {
     return key;
 }
 
+QList<QString> splitMax(const QString & input, const QString & str, int maxSplits) {
+	//qDebug() << "splitting" << input << "up to" << maxSplits << "times";
+	QList<QString> out;
+	int start = 0;
+	int splits = 0;
+	while (splits < maxSplits) {
+		int pos = input.indexOf(str, start);
+		if (pos == -1) break;
+		++ splits;
+		const QString part = input.mid(start, pos - start);
+		//qDebug() << "part" << part;
+		out.append(part);
+		start = pos + str.size();
+	}
+	const QString last = input.mid(start);
+	//qDebug() << "last" << last;
+	out.append(last);
+	return out;
+}
+
+QList<QString> rsplitMax(const QString & input, const QString & str, int maxSplits) {
+	//qDebug() << "splitting backward" << input << "up to" << maxSplits << "times";
+	QList<QString> out;
+	int end = input.size() - 1;
+	int splits = 0;
+	while (splits < maxSplits) {
+		int pos = input.lastIndexOf(str, end);
+		if (pos == -1) break;
+		++ splits;
+		int start = pos + str.size();
+		const QString part = input.mid(start, end - start + 1);
+		//qDebug() << "part" << part;
+		out.prepend(part);
+		end = pos - 1;
+	}
+	const QString first = input.left(end + 1);
+	//qDebug() << "first" << first;
+	out.prepend(first);
+	return out;
+}
+
+// To handle the max splits case having extra delimiters in the middle in a particular position, first split off one
+// side, and then the other 
+QList<QString> splitBackFrontMax(const QString & input, const QString & str, int maxSplitsBack, int thenSplitsFront) {
+    //qDebug() << "splitting" << input << maxSplitsBack << thenSplitsFront; 
+    QList<QString> parts = rsplitMax(input, str, maxSplitsBack);
+    if (parts.length() == maxSplitsBack + 1) {
+	QString first = parts.takeFirst();
+	QList<QString> rest = parts;
+	parts = splitMax(first, str, thenSplitsFront);
+	parts.append(rest);
+    }
+    //qDebug() << "merged parts" << parts;
+    return parts;
+}
+
 const QUrl BadgeImageProvider::getUrlForKey(QString & key) {
     QString url;
 
-    QList<QString> parts = key.split("-");
+    QList<QString> parts = splitBackFrontMax(key, "-", 2, 1);
+
     if (parts.length() == 3) {
         if (_channelManager->getChannelBadgeUrl(parts[0], parts[1], parts[2], url)) {
             return url;
@@ -88,7 +145,7 @@ QString BitsImageProvider::getCanonicalKey(QString key) {
     const QString type = "animated";
     const QString size = _hiDpi? "2" : "1";
 
-    int splitPos = key.indexOf('-');
+    int splitPos = key.lastIndexOf('-');
     if (splitPos != -1) {
         QString prefix = key.left(splitPos);
         QString minBits = key.mid(splitPos + 1);
@@ -111,7 +168,7 @@ QString BitsImageProvider::getCanonicalKey(QString key) {
 const QUrl ChannelManager::getBitsUrlForKey(const QString & key) const {
     QString url;
 
-    QList<QString> parts = key.split("-");
+    QList<QString> parts = splitBackFrontMax(key, "-", 1, 4);
     if (parts.length() == 6) {
         const QString & channelIdStr = parts[0];
         const QString & prefix = parts[4];

@@ -42,11 +42,11 @@ Item {
 
     height: childrenRect.height
 
+    signal afterFontSizeChanged()
+
     onFontSizeChanged: {
-        // defer updatePositions so that bindings to the font size have a chance to recalculate before the re-layout
-        Qt.callLater(function() {
-            _messageLineFlow.updatePositions()
-        })
+        // deferred signal so that bindings to the font size have a chance to recalculate first
+        Qt.callLater(afterFontSizeChanged)
     }
 
     function makeUrl(str) {
@@ -115,6 +115,11 @@ Item {
               rightMargin: dp(2)
           }
       }
+ 
+      Connections {
+	target: root
+	onAfterFontSizeChanged: { _messageLineFlow.updatePositions() }
+      }
 
       vAlign: vAlignCenter
 
@@ -170,6 +175,7 @@ Item {
           }
         }
       }
+
     }
 
     property Component msgText: Component {
