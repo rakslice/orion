@@ -2,3 +2,20 @@
 
 .DS_Store
 
+.qmake.stash
+*.o
+moc_*.cpp
+moc_predefs.h
+qrc_qml.cpp
+GPUCache
+orion
+src/.tags*
+
+.project
+.cproject
+.settings
+.externalToolBuilders
+
+Makefile
+Makefile.real
+
