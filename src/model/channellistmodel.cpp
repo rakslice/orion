@@ -83,10 +83,28 @@ QVariant ChannelListModel::data(const QModelIndex &index, int role) const
         case FavouriteRole:
             var.setValue(channel->isFavourite());
             break;
+
+        case OnlineNameSortRole:
+            var.setValue(QString((channel->getViewers() >= 0) ? "0online" : "1offline") + "_" + channel->getName().toLower());
+            break;
         }
     }
 
     return var;
+}
+
+bool ChannelListModel::setData(const QModelIndex & index, const QVariant & value, int role) {
+	const bool out = QAbstractItemModel::setData(index, value, role);
+	if (out) {
+		// send any additional dataChanged signals for role values calculated from data in other roles
+		switch (role) {
+			case NameRole:
+			case ViewersRole:
+				emit dataChanged(index, index, {OnlineNameSortRole});
+				break;
+		}
+	}
+	return out;
 }
 
 int ChannelListModel::rowCount(const QModelIndex &/*parent*/) const
@@ -130,11 +148,13 @@ bool ChannelListModel::updateChannelIfExisting(const Channel * channel) {
         debugChannel("existingChannel", existingChannel);
         debugChannel("addedChannel", channel);
 
+        const bool hasViewerCount = true;
+
         if (channel->getTime() < existingChannel->getTime()) {
             qDebug() << "added item was older; skipping update";
         }
         else {
-            existingChannel->updateWith(*channel);
+            existingChannel->updateWith(*channel, hasViewerCount);
             updateChannelForView(existingChannel);
         }
         return true;
@@ -174,13 +194,13 @@ int ChannelListModel::addAll(const QList<Channel *> &list)
     return filteredList.length();
 }
 
-void ChannelListModel::mergeAll(const QList<Channel *> &list)
+void ChannelListModel::mergeAll(const QList<Channel *> &list, bool haveViewerCounts)
 {
     if (!list.isEmpty()){
         foreach (Channel* channel, list){
             Channel *c = find(channel->getId());
             if (c) {
-                c->updateWith(*channel);
+                c->updateWith(*channel, haveViewerCounts);
             } else {
                 addChannel(new Channel(*channel));
             }
@@ -275,8 +295,11 @@ void ChannelListModel::updateChannel(Channel *item)
             return;
         }
 
+        const bool hasViewerCount = true;
+
         if (Channel *channel = find(item->getId())){
-            channel->updateWith(*item);
+            Q_ASSERT(item->getViewers() >= 0);
+            channel->updateWith(*item, hasViewerCount);
             updateChannelForView(channel);
         }
     }
@@ -293,14 +316,17 @@ void ChannelListModel::updateChannels(const QList<Channel *> &list)
 
 bool ChannelListModel::updateStream(Channel *item)
 {
+    // this is stream data that includes viewer counts
+
     bool onlineStateChanged = false;
 
     if (item && item->getId()){
 
         if (Channel *channel = find(item->getId())){
 
+            channel->setViewers(item->getViewers());
+
             if (item->isOnline()){
-                channel->setViewers(item->getViewers());
                 channel->setGame(item->getGame());
                 channel->setPreviewurl(item->getPreviewurl());
 

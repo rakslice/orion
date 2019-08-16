@@ -49,7 +49,7 @@ class Channel: public QObject{
         Channel(const quint64);
         Channel(const Channel&);
         ~Channel();
-        void updateWith(const Channel &other);
+        void updateWith(const Channel &other, bool hasViewerCount);
         void setName(const QString&);
         void setServiceName(const QString&);
         void setInfo(const QString&);

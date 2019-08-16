@@ -1173,6 +1173,7 @@ void NetworkManager::favouritesReply()
     int offset = reply->request().attribute(QNetworkRequest::User).toInt();
 
     auto result = JsonParser::parseFavourites(data);
+    // these followed-channels based items do not contain viewers data
     emit favouritesReplyFinished(result.items, offset, result.total);
 
     reply->deleteLater();
