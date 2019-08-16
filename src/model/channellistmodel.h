@@ -30,6 +30,7 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     QVariant data(const QModelIndex &index, int role) const;
+    bool setData(const QModelIndex & index, const QVariant & value, int role);
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QHash<int,QByteArray> roleNames() const;
 
@@ -43,7 +44,7 @@ public:
 
     void addChannel(Channel*);
     int addAll(const QList<Channel*> &);
-    void mergeAll(const QList<Channel*> &);
+    void mergeAll(const QList<Channel*> &, bool haveViewerCounts);
 
     void removeChannel(Channel*);
     Channel* find(const quint32&);
@@ -60,7 +61,8 @@ public:
         ServiceNameRole =   Qt::UserRole + 7,
         GameRole =          Qt::UserRole + 8,
         IdRole =            Qt::UserRole + 9,
-        FavouriteRole =     Qt::UserRole + 10
+        FavouriteRole =     Qt::UserRole + 10,
+        OnlineNameSortRole = Qt::UserRole + 11
     };
 
     QList<Channel *> getChannels() const;

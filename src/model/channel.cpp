@@ -18,13 +18,15 @@ Channel::~Channel(){
     //qDebug() << "Destroyer: Channel";
 }
 
-void Channel::updateWith(const Channel &other)
+void Channel::updateWith(const Channel &other, bool hasViewerCount)
 {
     if (this->getId() == other.getId()) {
         this->setName(other.getName());
         this->setLogourl(other.getLogourl());
         this->setInfo(other.getInfo());
-        this->setViewers(other.getViewers());
+        if (hasViewerCount) {
+            this->setViewers(other.getViewers());
+        }
         this->setGame(other.getGame());
     }
 }
@@ -111,7 +113,7 @@ void Channel::writeToSettings(QSettings &settings) const
     settings.setValue("id", id);
 }
 
-Channel::Channel(const QSettings &settings)
+Channel::Channel(const QSettings &settings) : viewers(-1), online(false), favourite(false)
 {
     //Deserialization constructor
 

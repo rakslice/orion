@@ -131,7 +131,7 @@ const QUrl BadgeImageProvider::getUrlForKey(QString & key) {
     return QUrl();
 }
 
-BitsImageProvider::BitsImageProvider(ChannelManager * channelManager, bool hiDpi) : ImageProvider("bits", ".gif"), _channelManager(channelManager), _hiDpi(hiDpi) {
+BitsImageProvider::BitsImageProvider(ChannelManager * channelManager, bool hiDpi) : ImageProvider("bits", ".gif"), _channelManager(channelManager), _hiDpi(hiDpi), _channelId(-1) {
 
 }
 
@@ -208,12 +208,23 @@ bool FavourtiteSortFilterProxyModel::lessThan(const QModelIndex &left, const QMo
     QString leftName = sourceModel()->data(left, ChannelListModel::Roles::NameRole).toString();
     QString rightName = sourceModel()->data(right, ChannelListModel::Roles::NameRole).toString();
 
+    bool out;
+
     if (leftHasViewers == rightHasViewers) {
-        return rightName.compare(leftName, Qt::CaseSensitivity::CaseInsensitive) < 0;
+        out = rightName.compare(leftName, Qt::CaseSensitivity::CaseInsensitive) < 0;
     } else {
-        return rightHasViewers;
+        out = rightHasViewers;
     }
 
+    /*
+    if (out) {
+        qDebug() << "pairwise sort" << rightName << rightViewers << leftName << leftViewers;
+    } else {
+        qDebug() << "pairwise sort" << leftName << leftViewers << rightName << rightViewers;
+    }
+    */
+
+    return !out;
 }
 
 ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netman), badgeImageProvider(this, hiDpi), bitsImageProvider(this, hiDpi) {
@@ -238,9 +249,11 @@ ChannelManager::ChannelManager(NetworkManager *netman, bool hiDpi) : netman(netm
     //Setup followed channels model and it's signal chain
     favouritesModel = createFollowedChannelsModel();
 
+    //favouritesProxy = new QSortFilterProxyModel();
     favouritesProxy = new FavourtiteSortFilterProxyModel(this);
-    favouritesProxy->sort(0, Qt::DescendingOrder);
+    favouritesProxy->setSortRole(ChannelListModel::Roles::OnlineNameSortRole);
     favouritesProxy->setSourceModel(favouritesModel);
+    favouritesProxy->sort(0, Qt::AscendingOrder);
     featuredProxy = new QSortFilterProxyModel();
     featuredProxy->setSourceModel(featuredModel);
     featuredProxy->setSortRole(ChannelListModel::Roles::ViewersRole);
@@ -1176,13 +1189,24 @@ void ChannelManager::getFollowedChannels(const quint32& limit, const quint32& of
 
 void ChannelManager::addFollowedResults(const QList<Channel *> &list, const quint32 offset, const quint32 total)
 {
+    // this member function is only used for followed-channels based items that do not contain users data
+    const bool haveViewerCounts = false;
+
     //    qDebug() << "Merging channel data for " << list.size()
     //             << " items with " << offset << " offset.";
 
-    favouritesModel->mergeAll(list);
+    /*
+    qDebug() << "Incoming merge:";
+    for (const auto item: list) {
+        qDebug() << item->getName() << " " << item->getViewers();
+    }
+    */
 
-    if (offset < total)
+    favouritesModel->mergeAll(list, haveViewerCounts);
+
+    if (offset < total) {
         getFollowedChannels(FOLLOWED_FETCH_LIMIT, offset);
+    }
 
     checkStreams(list);
 
