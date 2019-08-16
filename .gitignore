@@ -10,12 +10,32 @@ qrc_qml.cpp
 GPUCache
 orion
 src/.tags*
+orion_resource.rc
+debug.log
+distfiles/
+.qmake.stash
 
 .project
 .cproject
 .settings
 .externalToolBuilders
+*.sln
+*.sdf
+*.psess
+*.pro.user
+*.vcxproj
+*.vcxproj.*
+*.vspx
+*.natvis
+*.VC.db
+.vs/
 
 Makefile
-Makefile.real
+Makefile.Release
+Makefile.Debug
+Debug/
+Release/
 
+Makefile.real
+libs/
+*.cmd
