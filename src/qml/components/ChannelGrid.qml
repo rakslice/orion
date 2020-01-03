@@ -30,6 +30,7 @@ CommonGrid {
         */
         //playerView.openInBrowser(clickedItem);
         channelLauncher.launchChannel(clickedItem._id);
+        playerView.getChat(clickedItem);
     }
 
     onItemRightClicked: {
@@ -90,6 +91,8 @@ CommonGrid {
             text: "Launch In External Player"
             onTriggered: {
                 channelLauncher.launchChannel(_menu.item._id);
+                // also open chat
+                playerView.getChat(_menu.item);
             }
         }
 
