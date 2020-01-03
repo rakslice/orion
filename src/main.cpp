@@ -34,6 +34,7 @@
 #include "model/ircchat.h"
 #include "network/httpserver.h"
 #include <QFont>
+#include "player/channellauncher.h"
 
 #ifdef MPV_PLAYER
 #include "player/mpvrenderer.h"
@@ -99,6 +100,8 @@ int main(int argc, char *argv[])
     QNetworkProxyFactory::setUseSystemConfiguration(true);
     NetworkManager *netman = new NetworkManager(engine.networkAccessManager());
 
+    ChannelLauncher *channelLauncher = new ChannelLauncher();
+
     // detect hi dpi screens
     qDebug() << "Screens:";
     int screens = 0;
@@ -163,6 +166,7 @@ int main(int argc, char *argv[])
     rootContext->setContextProperty("vodsModel", vod->getModel());
     rootContext->setContextProperty("app_version", APP_VERSION);
     rootContext->setContextProperty("httpServer", httpserver);
+    rootContext->setContextProperty("channelLauncher", channelLauncher);
 
 #ifdef MPV_PLAYER
     rootContext->setContextProperty("player_backend", "mpv");
@@ -191,6 +195,8 @@ int main(int argc, char *argv[])
     //-------------------------------------------------------------------------------------------------------------------//
 
     //Cleanup
+    rootContext->setContextProperty("channelLauncher", nullptr);
+    delete channelLauncher;
     delete vod;
     delete tray;
     delete netman;

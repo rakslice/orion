@@ -39,3 +39,4 @@ Release/
 Makefile.real
 libs/
 *.cmd
+*.opendb
