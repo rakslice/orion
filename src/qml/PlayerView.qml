@@ -187,6 +187,14 @@ Item {
         getChannel(channel, vod, true, startPos);
     }
 
+    function getUrlForChannel(channelName) {
+        return "https://www.twitch.tv/" + channelName;
+    }
+
+    function openInBrowser(channel) {
+        Qt.openUrlExternally(getUrlForChannel(channel.name));
+    }
+
     function getChat(channel) {
         getChannel(channel, null, false, 0);
         if (chatview.status == 0) {

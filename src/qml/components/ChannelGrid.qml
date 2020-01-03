@@ -21,11 +21,14 @@ CommonGrid {
     tooltipEnabled: true
 
     onItemClicked: {
+        /*
         if (currentItem.online){
             playerView.getStreams(clickedItem)
         } else {
             playerView.getChat(clickedItem)
         }
+        */
+        playerView.openInBrowser(clickedItem);
     }
 
     onItemRightClicked: {
@@ -70,6 +73,14 @@ CommonGrid {
                 g_cman.addToFavourites(_menu.item._id)
             } else if (state === 2){
                 g_cman.removeFromFavourites(_menu.item._id)
+            }
+        }
+
+        MenuItem {
+            id: _openInBrowser
+            text: "Open In Browser"
+            onTriggered: {
+                playerView.openInBrowser(_menu.item)
             }
         }
 
